@@ -15,7 +15,7 @@ Modern recommendation systems operate as closed-loop controllers: user actions t
 Yet, platforms, regulators, and researchers lack a **transparent, statistically rigorous, and audit-ready metric** to quantify how tightly user behavior is coupled to system context. Existing methods suffer from finite-sample bias, lack reliability diagnostics, and are often misinterpreted as causal claims.
 
 🛠️ What PACIF Does
-PACIF (Predictive Alignment & Causal Information Flow) is an open-source framework that measures **predictive alignment** between user actions (User Actions) and system recommendations (System Recommendations) while controlling for observed confounders ($C$). 
+PACIF (Predictive Alignment & Causal Information Flow) is an open-source framework that measures **predictive alignment** between user actions (User Actions) and system recommendations (System Recommendations) while controlling for observed confounders (confounders). 
 
 It replaces naive correlation metrics with a production-ready diagnostic layer:
 - ✅ **Bias-corrected Mutual Information** (reduces finite-sample bias by 40–65%)
@@ -52,7 +52,7 @@ contexts = np.array([1, 1, 2, 1, 2, 3])    # System recommendations
 
 result = estimate_alignment(events, contexts)
 print(result)
-# Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
+Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
 
 📖 Documentation & Validation
 - Benchmark Results: Throughput >1,900 sessions/sec, p95 latency <1ms, FPR ≤5%
@@ -70,6 +70,7 @@ We are building this with the community and need your expertise:
 
 📄 Citation
 If you use PACIF in research, audits, or product workflows, please cite:
+
 ```bibtex
 @software{pacif_v3_2026,
   author       = {ppoiyo},
