@@ -7,7 +7,6 @@ PACIF v3.0: Predictive Alignment & Causal Information Flow
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 
----
 
 🔍 The Problem
 Modern recommendation systems operate as closed-loop controllers: user actions train the model, and the model shapes future exposure. This creates feedback loops that can lead to **behavioral lock-in**, **filter bubbles**, and **algorithmic manipulation**. 
@@ -71,7 +70,7 @@ We are building this with the community and need your expertise:
 📄 Citation
 If you use PACIF in research, audits, or product workflows, please cite:
 
-```bibtex
+bibtex
 @software{pacif_v3_2026,
   author       = {ppoiyo},
   title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
@@ -80,7 +79,7 @@ If you use PACIF in research, audits, or product workflows, please cite:
   doi          = {10.5281/zenodo.19902776},
   license      = {Apache-2.0}
 }
-```
+
 
 *Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.*
-```
+
