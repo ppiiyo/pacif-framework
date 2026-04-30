@@ -66,3 +66,9 @@ PACIF can be tested on:
 git clone https://github.com/pacif-framework/pacif-core
 cd pacif-core
 pip install -r requirements.txt
+
+
+streamlit run streamlit_app.py
+
+
+
