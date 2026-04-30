@@ -69,6 +69,8 @@ We are building this with the community. Algorithmic transparency should be a pu
 ## 📄 Citation
 
 If you use PACIF in research, audits, or product workflows, please cite:
+
+```bibtex
 @software{pacif_v3_2026,
   author       = {ppiyo},
   title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
@@ -77,6 +79,9 @@ If you use PACIF in research, audits, or product workflows, please cite:
   doi          = {10.5281/zenodo.19902776},
   license      = {Apache-2.0}
 }
+```
 
+---
 
-Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.
+*Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.*
+```
