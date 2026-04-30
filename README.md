@@ -1,3 +1,4 @@
+
 ```markdown
 # PACIF v3.0: Predictive Alignment & Causal Information Flow
 
