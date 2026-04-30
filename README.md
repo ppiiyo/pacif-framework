@@ -62,10 +62,21 @@ We are building this with the community. Algorithmic transparency should be a pu
 
 *   🐛 **Found a bug?** [Open an issue](https://github.com/ppiyo/pacif-framework/issues)
 *   💡 **Have an improvement?** Submit a Pull Request.
-*   📧 **For enterprise/audit integration:** prodazzha44@gmail.com
+*   📧 **For enterprise/audit integration:** for.smirnov.maks@gmail.com
 
 ---
 
 ## 📄 Citation
 
 If you use PACIF in research, audits, or product workflows, please cite:
+@software{pacif_v3_2026,
+  author       = {ppiyo},
+  title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
+  year         = {2026},
+  url          = {https://github.com/ppiyo/pacif-framework},
+  doi          = {10.5281/zenodo.19902776},
+  license      = {Apache-2.0}
+}
+
+
+Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.
