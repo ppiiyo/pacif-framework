@@ -47,7 +47,7 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run app.py ```
 
 🐍 Use in Python
 
