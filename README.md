@@ -1,10 +1,3 @@
-Да, вижу проблему! В README.md **неправильно оформлены блоки кода**. Они отображаются как обычный текст, а не как код с подсветкой.
-
-## 🔧 Исправление
-
-Нужно обернуть все блоки кода в **тройные обратные кавычки** с указанием языка. Вот полностью исправленный `README.md`:
-
-```markdown
 # PACIF v3.0: Predictive Alignment & Causal Information Flow
 
 > **Measures how strongly algorithms shape user behavior — and whether that signal is reliable.**
@@ -51,14 +44,11 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 
 ### 💻 Install Locally
 
+
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-```
 
-### 🐍 Use in Python
-
-```python
 from pacif_core import estimate_alignment
 import numpy as np
 
@@ -72,30 +62,7 @@ result = estimate_alignment(events, contexts)
 print(result)
 
 # Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
-```
 
-## 📖 Documentation & Validation
-
-- **Benchmark Results**: Throughput >1,900 sessions/sec, p95 latency <1ms, FPR ≤5%
-- **Production Stack**: Includes Docker, Prometheus exporter, Grafana dashboards, and runbooks
-- **Explicit Boundaries**: PACIF measures statistical predictability, not causality or wellbeing. Normative claims require intervention data and validated psychometrics.
-
-## 🤝 Open Source & Community
-
-PACIF is released under **Apache 2.0** because algorithmic transparency should be a public good, not a proprietary black box.
-
-**We are building this with the community and need your expertise:**
-
-- 🐛 **Found a bug or edge case?** [Open an issue](https://github.com/ppiyo/pacif-framework/issues)
-- 💡 **Have an improvement or domain adapter?** Submit a Pull Request
-- 🌍 **Testing in a new domain?** (News, video, social, e-commerce) — share your results in Discussions!
-- 📧 **For enterprise/audit integration:** prodazzha44@gmail.com
-
-## 📄 Citation
-
-If you use PACIF in research, audits, or product workflows, please cite:
-
-```bibtex
 @software{pacif_v3_2026,
   author       = {ppiyo},
   title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
@@ -104,12 +71,4 @@ If you use PACIF in research, audits, or product workflows, please cite:
   doi          = {10.5281/zenodo.19902776},
   license      = {Apache-2.0}
 }
-```
-
----
-
-*Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.*
-```
-
----
 
