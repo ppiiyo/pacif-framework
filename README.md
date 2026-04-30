@@ -49,4 +49,3 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 pip install -r requirements.txt
 streamlit run app.py
 
-### 🐍 Use in Python
