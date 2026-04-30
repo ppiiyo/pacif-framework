@@ -49,7 +49,7 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 pip install -r requirements.txt
 streamlit run app.py
 
-🐍 Use in Python
+##🐍 Use in Python
 
 from pacif_core import estimate_alignment
 import numpy as np
