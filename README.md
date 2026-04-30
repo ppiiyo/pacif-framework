@@ -42,7 +42,6 @@ It replaces naive correlation metrics with a production-ready diagnostic layer:
 ### 🌐 Try the Live Demo
 
 No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app)**
-```
 
 ### 💻 Install Locally
 
