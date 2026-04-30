@@ -9,11 +9,18 @@ if st.button("🚀 Run Analysis"):
     progress = st.progress(0)
     results, detector = [], DriftDetector()
     
-    for i in range(n_sess):
-        ev = np.random.randint(0,5,s_len)
-        ctx = np.copy(ev); ctx[np.random.random(s_len)<0.2] = np.random.randint(0,5,sum(np.random.random(s_len)<0.2))
-        r = estimate_alignment(ev, ctx); r['id']=i; r['drift']=detector.update(r['mi_estimate'])['drift']
-        results.append(r); progress.progress((i+1)/n_sess)
+        for i in range(n_sess):
+        ev = np.random.randint(0, 5, s_len)
+        mask = np.random.random(s_len) < 0.2
+        ctx = np.copy(ev)
+        ctx[mask] = np.random.randint(0, 5, size=np.sum(mask))
+        r = estimate_alignment(ev, ctx)
+        r['id'] = i
+        r['drift'] = detector.update(r['mi_estimate'])['drift']
+        results.append(r)
+        progress.progress((i + 1) / n_sess)
+
+
     
     df = pd.DataFrame([r for r in results if r['status']=='success'])
     if not df.empty:
