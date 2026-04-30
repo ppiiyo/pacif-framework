@@ -70,15 +70,16 @@ We are building this with the community and need your expertise:
 📄 Citation
 If you use PACIF in research, audits, or product workflows, please cite:
 
-bibtex
+
 @software{pacif_v3_2026,
-  author       = {ppoiyo},
+  author       = {ppiiyo},
   title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
   year         = {2026},
   url          = {https://github.com/ppiyo/pacif-framework},
   doi          = {10.5281/zenodo.19902776},
   license      = {Apache-2.0}
 }
+
 
 
 *Built for transparency, reproducibility, and algorithmic accountability. © 2026 PACIF Framework Contributors.*
