@@ -49,7 +49,6 @@ pip install -r requirements.txt
 # 3. Run the application
 streamlit run app.py
 
----
 
 ## 🐍 Usage Example
 
@@ -74,9 +73,8 @@ print(result)
 #   ...
 # }
 
----
 
-## 📊 Interpreting Results
+📊 Interpreting Results
 
 PACIF provides not just a number, but an interpretation of the relationship between users and algorithms.
 
@@ -86,7 +84,6 @@ PACIF provides not just a number, but an interpretation of the relationship betw
 | **Reliability Ratio** | % of sessions where the estimate is statistically valid. | <70%: Increase sample size or window. |
 | **Drift Status** | Has behavior changed significantly over time? | Drift Detected: Model may need recalibration. |
 
----
 
 ## 📖 Documentation & Validation
 
@@ -94,7 +91,6 @@ PACIF provides not just a number, but an interpretation of the relationship betw
 *   **Explicit Boundaries:** PACIF measures statistical predictability, **not** causality or user wellbeing. Normative claims require intervention data.
 *   **Audit Schema:** Includes automated checks for category inflation and cherry-picking.
 
----
 
 ## 🤝 Contributing
 
