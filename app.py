@@ -30,12 +30,6 @@ with st.sidebar:
     st.header("⚙️ Configuration")
     
     with st.form("analysis_form"):
-        dataset_type = st.selectbox(
-            "Dataset",
-            ["Synthetic Demo (Default)", "Yambda Sample", "Custom CSV (Mock)"],
-            index=0
-        )
-        
         n_sessions = st.slider("Sample Size (Sessions)", 50, 500, 200)
         session_len = st.slider("Window Size (Events)", 30, 200, 60)
         
@@ -57,11 +51,16 @@ if submitted:
         progress_bar = st.progress(0)
         
         for i in range(n_sessions):
-            # Генерация событий
+            # Генерация событий (исправленная версия)
             ev = np.random.randint(0, 5, session_len)
+            
+            # Маска для случайного шума
             mask = np.random.random(session_len) < 0.2
             ctx = np.copy(ev)
-            ctx[mask] = np.random.randint(0, 5, size=int(np.sum(mask)))
+            
+            # Безопасное присвоение через маску
+            if np.sum(mask) > 0:
+                ctx[mask] = np.random.randint(0, 5, size=int(np.sum(mask)))
             
             # Оценка
             res = estimate_alignment(ev, ctx)
@@ -78,6 +77,7 @@ if submitted:
 
         # Фильтрация надежных данных
         df = pd.DataFrame([r for r in results if r['status'] == 'success'])
+        
         if not df.empty:
             
             # --- Блок 1: KPI Карточки ---
@@ -108,44 +108,12 @@ if submitted:
             )
 
             st.markdown("---")
-            # --- ИНТЕРПРЕТАЦИЯ МЕТРИК ---
-st.markdown("### 📖 Как читать результаты")
-
-with st.expander("📊 Signal Strength (MI)", expanded=False):
-    st.markdown("""
-    **Mutual Information (MI)** измеряет силу связи между действиями пользователя и рекомендациями:
-    - **< 0.1 nats**: Слабая связь (алгоритм почти не влияет)
-    - **0.1 - 0.5 nats**: Умеренная связь (нормальная персонализация)
-    - **0.5 - 1.0 nats**: Сильная связь (риск "пузыря фильтров")
-    - **> 1.0 nats**: Очень сильная связь (высокий риск lock-in)
-    """)
-
-with st.expander("✅ Reliable Data Ratio", expanded=False):
-    st.markdown("""
-    **Процент надёжных оценок** показывает, насколько можно доверять результатам:
-    - **> 90%**: Отличное качество данных
-    - **70-90%**: Хорошее качество (небольшие пробелы)
-    - **50-70%**: Среднее качество (рекомендуется увеличить выборку)
-    - **< 50%**: Низкое качество (результаты ненадёжны)
-    """)
-
-with st.expander("⚠️ Drift Detection", expanded=False):
-    st.markdown("""
-    **Дрейф** показывает, менялось ли поведение пользователей со временем:
-    - **Stable ✅**: Поведение стабильно, модель работает предсказуемо
-    - **Drift ⚠️**: Поведение изменилось — нужна адаптация алгоритма
-    """)
-
-
 
             # --- Блок 2: График ---
             st.subheader("📊 Alignment Dynamics")
             st.markdown("Visualizing how the signal strength changes over the session window.")
             
             chart_data = df.set_index('id')[['mi_estimate']]
-            # Базовая линия для визуализации
-            baseline = np.full(len(df), np.median(df['mi_estimate']))
-            
             st.line_chart(chart_data, height=300)
 
             # --- Блок 3: Интерпретация (Human-readable) ---
@@ -184,6 +152,4 @@ st.markdown("""
     <p>Built for transparency, reproducibility, and algorithmic accountability.</p>
 </div>
 """, unsafe_allow_html=True)
-
-
 
