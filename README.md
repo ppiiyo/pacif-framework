@@ -70,7 +70,6 @@ We are building this with the community and need your expertise:
 📄 Citation
 If you use PACIF in research, audits, or product workflows, please cite:
 
-
 @software{pacif_v3_2026,
   author       = {ppiiyo},
   title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
@@ -79,6 +78,10 @@ If you use PACIF in research, audits, or product workflows, please cite:
   doi          = {10.5281/zenodo.19902776},
   license      = {Apache-2.0}
 }
+
+
+
+
 
 
 
