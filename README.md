@@ -35,43 +35,7 @@ It replaces naive correlation metrics with a production-ready diagnostic layer:
 No installation required. Explore the metrics and interface:  
 👉 **[Launch PACIF Demo](https://pacif-demo.streamlit.app)**
 
-### 💻 Install Locally
 
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/ppiyo/pacif-framework.git
-cd pacif-framework
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Run the application
-streamlit run app.py
-
-
-## 🐍 Usage Example
-
-You can use PACIF as a library in your own research or pipeline:
-from pacif_core import estimate_alignment
-import numpy as np
-
-# Example data: User actions vs System recommendations
-events = np.array([1, 1, 2, 1, 2, 2, 1, 2, 1, 2])
-contexts = np.array([1, 1, 2, 1, 2, 3, 1, 2, 1, 2])
-
-# Calculate predictive alignment
-result = estimate_alignment(events, contexts)
-
-print(result)
-# Output:
-# {
-#   'status': 'success', 
-#   'mi_estimate': 0.412, 
-#   'ci_95': [0.38, 0.44], 
-#   'reliable': True,
-#   ...
-# }
 
 
 📊 Interpreting Results
