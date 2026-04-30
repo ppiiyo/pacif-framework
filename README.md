@@ -1,4 +1,4 @@
-```markdown
+````markdown
 # PACIF v3.0: Predictive Alignment & Causal Information Flow
 
 > **Measures how strongly algorithms shape user behavior — and whether that signal is reliable.**
@@ -49,4 +49,22 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
+
+### 🐍 Use in Python
+
+
+from pacif_core import estimate_alignment
+import numpy as np
+
+# User actions
+events = np.array([1, 1, 2, 1, 2, 2])
+
+# System recommendations
+contexts = np.array([1, 1, 2, 1, 2, 3])
+
+result = estimate_alignment(events, contexts)
+print(result)
+
+# Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
+
 
