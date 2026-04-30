@@ -15,7 +15,7 @@ Modern recommendation systems operate as closed-loop controllers: user actions t
 Yet, platforms, regulators, and researchers lack a **transparent, statistically rigorous, and audit-ready metric** to quantify how tightly user behavior is coupled to system context. Existing methods suffer from finite-sample bias, lack reliability diagnostics, and are often misinterpreted as causal claims.
 
 🛠️ What PACIF Does
-PACIF (Predictive Alignment & Causal Information Flow) is an open-source framework that measures **predictive alignment** between user actions ($U$) and system recommendations ($S$) while controlling for observed confounders ($C$). 
+PACIF (Predictive Alignment & Causal Information Flow) is an open-source framework that measures **predictive alignment** between user actions (User Actions) and system recommendations (System Recommendations) while controlling for observed confounders ($C$). 
 
 It replaces naive correlation metrics with a production-ready diagnostic layer:
 - ✅ **Bias-corrected Mutual Information** (reduces finite-sample bias by 40–65%)
