@@ -49,6 +49,8 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 pip install -r requirements.txt
 streamlit run app.py
 
+🐍 Use in Python
+
 from pacif_core import estimate_alignment
 import numpy as np
 
@@ -62,13 +64,4 @@ result = estimate_alignment(events, contexts)
 print(result)
 
 # Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
-
-@software{pacif_v3_2026,
-  author       = {ppiyo},
-  title        = {PACIF v3.0: Predictive Alignment & Causal Information Flow},
-  year         = {2026},
-  url          = {https://github.com/ppiyo/pacif-framework},
-  doi          = {10.5281/zenodo.19902776},
-  license      = {Apache-2.0}
-}
 
