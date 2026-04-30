@@ -47,7 +47,7 @@ No installation required: **[Launch PACIF Demo](https://pacif-demo.streamlit.app
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py ```
+streamlit run app.py 
 
 🐍 Use in Python
 
@@ -64,6 +64,8 @@ result = estimate_alignment(events, contexts)
 print(result)
 
 # Output: {'status': 'success', 'mi_estimate': 0.412, 'ci_95': [0.38, 0.44], 'reliable': True, ...}
+
+
 
 📖 Documentation & Validation
 	•	Benchmark Results: Throughput >1,900 sessions/sec, p95 latency <1ms, FPR ≤5%
