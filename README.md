@@ -5,11 +5,11 @@
 > Measures how strongly algorithms shape user behavior — and whether that signal is reliable.
 
 [![Streamlit Demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pacif-demo.streamlit.app)
+[![PyPI](https://img.shields.io/pypi/v/pacif-framework.svg)](https://pypi.org/project/pacif-framework/)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.19902776-blue)](https://doi.org/10.5281/zenodo.19902776)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/badge/PyPI-coming%20soon-lightgrey.svg)](https://pypi.org/)
 
 ---
 
@@ -72,11 +72,10 @@ Outreach one-pager: **[docs/POSITIONING.md](docs/POSITIONING.md)**
 ### Install
 
 ```bash
-pip install -e .                       # core
-pip install -e ".[demo,causal,dev]"    # demo + causal example + tests
+pip install pacif-framework
 ```
 
-Or from the repository:
+From source (development):
 
 ```bash
 git clone https://github.com/ppiiyo/pacif-framework.git
