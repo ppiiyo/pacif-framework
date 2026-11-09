@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pacif-framework"
-version = "3.0.0"
+version = "3.0.1"
 description = "Statistically rigorous framework for human–algorithm predictive alignment. Measures how strongly algorithms shape user behavior — and whether that signal is reliable."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -24,7 +24,9 @@ keywords = [
     "transparency",
     "drift-detection",
     "predictive-alignment",
-    "responsible-ai"
+    "responsible-ai",
+    "fairness",
+    "filter-bubble",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -62,6 +64,8 @@ dev = [
     "pytest>=7.0",
     "ruff>=0.1",
     "mypy>=1.0",
+    "build>=1.0",
+    "twine>=4.0",
 ]
 
 [project.urls]
@@ -71,14 +75,23 @@ Repository = "https://github.com/ppiiyo/pacif-framework"
 "Bug Tracker" = "https://github.com/ppiiyo/pacif-framework/issues"
 DOI = "https://doi.org/10.5281/zenodo.19902776"
 Demo = "https://pacif-demo.streamlit.app"
+Changelog = "https://github.com/ppiiyo/pacif-framework/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pacif_core*"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.9"
