@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pacif-framework"
+version = "3.0.0"
+description = "Statistically rigorous framework for human–algorithm predictive alignment. Measures how strongly algorithms shape user behavior — and whether that signal is reliable."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "PACIF Framework Contributors", email = "for.smirnov.maks@gmail.com"}
+]
+maintainers = [
+    {name = "ppiiyo", email = "for.smirnov.maks@gmail.com"}
+]
+keywords = [
+    "algorithmic-accountability",
+    "mutual-information",
+    "recommendation-systems",
+    "causal-inference",
+    "audit",
+    "transparency",
+    "drift-detection",
+    "predictive-alignment",
+    "responsible-ai"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "numpy>=1.24",
+    "numba>=0.58",
+    "scipy>=1.10",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+demo = [
+    "streamlit>=1.28",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+]
+causal = [
+    "scikit-learn>=1.3",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.1",
+    "mypy>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ppiiyo/pacif-framework"
+Documentation = "https://github.com/ppiiyo/pacif-framework#readme"
+Repository = "https://github.com/ppiiyo/pacif-framework"
+"Bug Tracker" = "https://github.com/ppiiyo/pacif-framework/issues"
+DOI = "https://doi.org/10.5281/zenodo.19902776"
+Demo = "https://pacif-demo.streamlit.app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pacif_core*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
