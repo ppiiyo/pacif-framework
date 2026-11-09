@@ -11,7 +11,7 @@ from pacif_core import estimate_alignment
 def make_batch(n_sessions: int, n_events: int = 60, seed: int = 0):
     rng = np.random.default_rng(seed)
     batch = []
-    for i in range(n_sessions):
+    for _ in range(n_sessions):
         ev = rng.integers(0, 5, size=n_events)
         ctx = ev.copy()
         mask = rng.random(n_events) < 0.25

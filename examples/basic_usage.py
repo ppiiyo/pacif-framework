@@ -11,10 +11,16 @@ Demonstrates:
 from __future__ import annotations
 
 import numpy as np
-from pacif_core import estimate_alignment, DriftDetector, AuditReporter
+
+from pacif_core import AuditReporter, DriftDetector, estimate_alignment
 
 
-def generate_session(n_events: int = 80, coupling: float = 0.7, n_categories: int = 5, seed: int | None = None):
+def generate_session(
+    n_events: int = 80,
+    coupling: float = 0.7,
+    n_categories: int = 5,
+    seed: int | None = None,
+):
     """Generate a synthetic user-action / system-context session."""
     rng = np.random.default_rng(seed)
     events = rng.integers(0, n_categories, size=n_events)

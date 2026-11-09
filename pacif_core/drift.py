@@ -3,11 +3,11 @@ class DriftDetector:
         self.threshold, self.slack = threshold, slack
         self.cus_pos = self.cus_neg = 0.0
         self.history, self.baseline = [], None
-        
+
     def update(self, value: float) -> dict:
         self.history.append(value)
         if len(self.history) < 50:
-            return {'drift': False, 'reason': 'warming_up'}
+            return {"drift": False, "reason": "warming_up"}
         if len(self.history) == 50:
             self.baseline = sum(self.history[-50:]) / 50.0
         dev = value - self.baseline
@@ -16,5 +16,5 @@ class DriftDetector:
         if self.cus_pos > self.threshold or self.cus_neg > self.threshold:
             self.cus_pos = self.cus_neg = 0.0
             self.baseline = value
-            return {'drift': True, 'value': value, 'baseline': self.baseline}
-        return {'drift': False}
+            return {"drift": True, "value": value, "baseline": self.baseline}
+        return {"drift": False}
