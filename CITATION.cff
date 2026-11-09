@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "PACIF v3.0: Predictive Alignment & Causal Information Flow"
+message: "If you use PACIF in research, audits, or product workflows, please cite it."
+type: software
+authors:
+  - name: "PACIF Framework Contributors"
+    email: for.smirnov.maks@gmail.com
+repository-code: "https://github.com/ppiiyo/pacif-framework"
+url: "https://github.com/ppiiyo/pacif-framework"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.19902776
+license: Apache-2.0
+version: 3.0.1
+date-released: "2026-11-09"
+keywords:
+  - algorithmic-accountability
+  - mutual-information
+  - recommendation-systems
+  - audit
+  - predictive-alignment
+  - responsible-ai
+abstract: >-
+  PACIF is an open-source framework that measures predictive alignment between
+  user actions and system recommendations using bias-corrected mutual information,
+  reliability diagnostics, drift detection, and regulator-ready audit reports.

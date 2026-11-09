@@ -8,6 +8,7 @@
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.19902776-blue)](https://doi.org/10.5281/zenodo.19902776)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/badge/PyPI-coming%20soon-lightgrey.svg)](https://pypi.org/)
 
 ---
@@ -42,10 +43,10 @@ It is deliberately **not** a measure of causality, user wellbeing, or “manipul
 - **Bias-corrected Mutual Information** — Miller-Madow correction reduces finite-sample bias by 40–65%.
 - **Strict reliability diagnostics** — automatically flags unstable estimates via confidence-interval width thresholds.
 - **Cumulative drift detection** — CUSUM + Page-Hinkley for non-stationary behavioral shifts.
-- **Regulator-ready audit reports** — YAML output with exclusion-rate and anti-gaming checks.
+- **Regulator-ready audit reports** — YAML output with exclusion-rate, category-inflation, skew, and drift flags.
 - **Causal integration pattern** — PACIF features reduce Doubly Robust (DR) estimator bias by ~89% in controlled simulations.
 
-**Performance (reference):** >1,900 sessions/sec, p95 latency <1 ms.
+**Performance (reference):** >1,900 sessions/sec, p95 latency <1 ms (`examples/benchmark_throughput.py`).
 
 ---
 
@@ -57,7 +58,8 @@ PACIF measures **statistical predictability**, not causality and not wellbeing.
 - Normative or causal claims require intervention data, experimental design, or stronger identification assumptions.
 - The framework is designed to be honest about uncertainty: unreliable estimates are explicitly marked.
 
-This clarity is intentional. It makes PACIF suitable for audits, compliance discussions, and research without overclaiming.
+Full practitioner guide: **[docs/INTERPRETATION.md](docs/INTERPRETATION.md)**  
+Outreach one-pager: **[docs/POSITIONING.md](docs/POSITIONING.md)**
 
 ---
 
@@ -70,8 +72,8 @@ This clarity is intentional. It makes PACIF suitable for audits, compliance disc
 ### Install
 
 ```bash
-pip install -e .                  # core
-pip install -e ".[demo,causal]"   # + Streamlit demo + causal example
+pip install -e .                       # core
+pip install -e ".[demo,causal,dev]"    # demo + causal example + tests
 ```
 
 Or from the repository:
@@ -79,7 +81,8 @@ Or from the repository:
 ```bash
 git clone https://github.com/ppiiyo/pacif-framework.git
 cd pacif-framework
-pip install -e ".[demo]"
+pip install -e ".[demo,dev]"
+pytest tests/ -v
 ```
 
 ### Minimal usage
@@ -88,10 +91,8 @@ pip install -e ".[demo]"
 from pacif_core import estimate_alignment, DriftDetector, AuditReporter
 import numpy as np
 
-# events  = user actions (categorical)
-# contexts = system recommendations / context (categorical)
-events   = np.array([0, 1, 0, 2, 1, 0, 2, 1, ...])
-contexts = np.array([0, 1, 0, 1, 1, 0, 2, 1, ...])
+events   = np.array([0, 1, 0, 2, 1, 0, 2, 1] * 20)
+contexts = np.array([0, 1, 0, 1, 1, 0, 2, 1] * 20)
 
 result = estimate_alignment(events, contexts)
 
@@ -101,7 +102,7 @@ if result["status"] == "success":
     print(f"Reliable: {result['reliable']}")
 ```
 
-See `examples/basic_usage.py` for a complete multi-session + drift + audit example.
+See `examples/basic_usage.py` for multi-session + drift + audit.
 
 ---
 
@@ -112,6 +113,8 @@ See `examples/basic_usage.py` for a complete multi-session + drift + audit examp
 | **Signal Strength (MI)** | Intensity of coupling | > 0.8 nats → investigate lock-in risk |
 | **Reliability Ratio** | % of sessions with statistically valid estimates | < 70% → increase sample size or window |
 | **Drift Status** | Significant change in the relationship over time | Drift detected → consider model recalibration |
+
+Deep dive: [docs/INTERPRETATION.md](docs/INTERPRETATION.md)
 
 ---
 
@@ -131,13 +134,18 @@ See `examples/basic_usage.py` for a complete multi-session + drift + audit examp
 pacif-framework/
 ├── pacif_core/
 │   ├── estimator.py      # Bias-corrected MI + reliability
-│   ├── drift.py          # CUSUM / Page-Hinkley drift detector
-│   └── audit.py          # YAML audit reporter
+│   ├── drift.py          # CUSUM-style drift detector
+│   └── audit.py          # YAML audit reporter (schema 1.1)
+├── tests/                # pytest suite
+├── docs/
+│   ├── INTERPRETATION.md
+│   └── POSITIONING.md
 ├── examples/
-│   └── basic_usage.py
+│   ├── basic_usage.py
+│   └── benchmark_throughput.py
 ├── app.py                # Streamlit demo
 ├── causal_integration.py # DR estimator illustration
-└── pyproject.toml
+└── .github/workflows/ci.yml
 ```
 
 ---
@@ -157,6 +165,7 @@ We welcome contributions. Algorithmic transparency should be a public good.
 - 🐛 [Open an issue](https://github.com/ppiiyo/pacif-framework/issues)
 - 💡 Pull requests are welcome (see [CONTRIBUTING.md](CONTRIBUTING.md))
 - 📜 Please follow the [Code of Conduct](CODE_OF_CONDUCT.md)
+- 🔒 [Security policy](SECURITY.md)
 
 ---
 
@@ -174,6 +183,8 @@ If you use PACIF in research, audits, or product workflows, please cite:
   license      = {Apache-2.0}
 }
 ```
+
+Also available as [`CITATION.cff`](CITATION.cff).
 
 ---
 
