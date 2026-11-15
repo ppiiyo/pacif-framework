@@ -192,7 +192,6 @@ def estimate_alignment(
         ci_l, ci_u = _moving_block_bootstrap_ci(
             me, mc, n_u, n_s, N, block_length, n_resamples, sample_seed
         )
-        se = float((ci_u - ci_l) / (2.0 * 1.96)) if ci_u > ci_l else 0.0
 
     ci_w = float(ci_u - ci_l)
     rel_ci = ci_w / (abs(float(mi)) + 1e-8)
