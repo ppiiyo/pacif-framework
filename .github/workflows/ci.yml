@@ -31,9 +31,13 @@ jobs:
         run: |
           ruff check pacif_core tests examples
 
-      - name: Run tests
+      - name: Typecheck with mypy
         run: |
-          pytest tests/ -v --tb=short
+          mypy pacif_core
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ -v --tb=short --cov=pacif_core --cov-report=term-missing
 
   package:
     runs-on: ubuntu-latest
