@@ -5,6 +5,23 @@ All notable changes to PACIF are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - Unreleased
+
+### Fixed
+- Miller–Madow bias now in **nats** using observed non-zero joint cells `(m_hat - 1) / (2N)` (was bits-scale full grid `(Ku-1)(Ks-1)/(2N ln 2)`, overstating bias by ~1.44× and on sparse tables).
+- Cardinality guard: `N < min_expected_cell_count * n_u * n_s` → `unreliable` / `high_cardinality` (default cell count 5).
+- Asymptotic variance uses `mi_raw`; zero/negative variance sets `variance_degenerate=True` and forces `reliable=False`.
+- CI lower bound clipped at 0; docstring notes i.i.d. assumption for asymptotic intervals.
+- Input validation: 1-d equal-length arrays (`length_mismatch` / `invalid_shape`).
+- Subsampling via seeded `rng.choice` (was deterministic `linspace`, aliasing period-8 patterns); `max_events=None` disables the cap.
+
+### Added
+- Optional `method="bootstrap"` (moving-block bootstrap CI, seeded).
+- Parameters: `min_expected_cell_count`, `sample_seed`, `method`, `block_length`, `n_resamples`.
+
+### Changed
+- **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
+
 ## [3.0.1] - 2026-11-09
 
 ### Added
