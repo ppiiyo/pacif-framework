@@ -40,11 +40,11 @@ It is deliberately **not** a measure of causality, user wellbeing, or “manipul
 
 ### Core capabilities
 
-- **Bias-corrected Mutual Information** — Miller-Madow correction reduces finite-sample bias by 40–65%.
+- **Bias-corrected Mutual Information** — Miller–Madow correction removes first-order finite-sample bias.
 - **Strict reliability diagnostics** — automatically flags unstable estimates via confidence-interval width thresholds.
-- **Cumulative drift detection** — CUSUM + Page-Hinkley for non-stationary behavioral shifts.
-- **Regulator-ready audit reports** — YAML output with exclusion-rate, category-inflation, skew, and drift flags.
-- **Causal integration pattern** — PACIF features reduce Doubly Robust (DR) estimator bias by ~89% in controlled simulations.
+- **Cumulative drift detection** — CUSUM + Page-Hinkley for non-stationary shifts in the alignment signal.
+- **Regulator-ready audit reports** — YAML output with exclusion-rate, category-inflation, skew, and drift flags (schema 1.2).
+- **Causal integration pattern** — synthetic PACIF-like features reduce Doubly Robust (DR) estimator bias in an illustrative simulation; see `causal_integration.py` (features are predictive by construction — not evidence on real data).
 
 **Performance (reference):** >1,900 sessions/sec, p95 latency <1 ms (`examples/benchmark_throughput.py`).
 
@@ -133,8 +133,8 @@ Deep dive: [docs/INTERPRETATION.md](docs/INTERPRETATION.md)
 pacif-framework/
 ├── pacif_core/
 │   ├── estimator.py      # Bias-corrected MI + reliability
-│   ├── drift.py          # CUSUM-style drift detector
-│   └── audit.py          # YAML audit reporter (schema 1.1)
+│   ├── drift.py          # CUSUM + Page-Hinkley detectors
+│   └── audit.py          # YAML audit reporter (schema 1.2)
 ├── tests/                # pytest suite
 ├── docs/
 │   ├── INTERPRETATION.md
@@ -143,7 +143,7 @@ pacif-framework/
 │   ├── basic_usage.py
 │   └── benchmark_throughput.py
 ├── app.py                # Streamlit demo
-├── causal_integration.py # DR estimator illustration
+├── causal_integration.py # DR estimator illustration (synthetic)
 └── .github/workflows/ci.yml
 ```
 

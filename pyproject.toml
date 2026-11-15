@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pacif-framework"
 dynamic = ["version"]
-description = "Statistically rigorous framework for human–algorithm predictive alignment. Measures how strongly algorithms shape user behavior — and whether that signal is reliable."
+description = "Statistically rigorous framework for predictive alignment: measures statistical coupling between user behavior and system context, and assesses estimate reliability."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
