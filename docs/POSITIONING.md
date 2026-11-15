@@ -6,7 +6,7 @@
 
 ## One sentence
 
-PACIF quantifies how tightly recommendation systems couple user behavior to algorithmic context — with bias-corrected mutual information, reliability diagnostics, and regulator-ready audit reports.
+PACIF quantifies statistical coupling between user actions and system context — with bias-corrected mutual information, reliability diagnostics, and regulator-ready audit reports.
 
 ---
 
@@ -18,11 +18,11 @@ Recommendation systems are closed loops. Platforms and regulators lack a transpa
 
 Open-source diagnostic layer:
 
-- Bias-corrected MI (Miller-Madow)
+- Bias-corrected MI (Miller–Madow)
 - Reliability gates (CI-based)
-- Drift detection (CUSUM-style)
+- Drift detection (CUSUM + Page-Hinkley)
 - YAML audits with anti-gaming flags
-- Optional features for causal estimators (DR bias reduction in simulations)
+- Optional integration pattern for causal estimators (illustrative simulation only)
 
 ## What we are **not**
 
@@ -50,10 +50,16 @@ Open-source diagnostic layer:
 
 ## Proof points
 
-- Bias reduction 40–65% vs naive MI (Miller-Madow)
-- DR bias reduction ~89% in controlled simulations when PACIF features are included
+- Miller–Madow removes first-order finite-sample bias in MI estimates
+- Illustrative DR simulation with synthetic PACIF-like features: see `causal_integration.py` (not evidence on real data)
 - Throughput >1,900 sessions/sec, p95 latency <1 ms (reference)
 - Apache-2.0, DOI on Zenodo, explicit statistical boundaries
+
+## Preferred language (see INTERPRETATION §3)
+
+- “User actions are statistically predictable from system context at MI ≈ X nats.”
+- “The coupling estimate is reliable on Y% of sessions.”
+- Avoid: “the algorithm causes harm / proves manipulation.”
 
 ## Ask (pick one)
 
