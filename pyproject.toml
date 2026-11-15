@@ -65,6 +65,7 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.1",
     "mypy>=1.0",
+    "types-PyYAML>=6.0",
     "build>=1.0",
     "twine>=4.0",
 ]
@@ -103,6 +104,7 @@ warn_return_any = true
 warn_unused_configs = true
 packages = ["pacif_core"]
 
+# numba has no official type stubs; only this module is exempted.
 [[tool.mypy.overrides]]
 module = ["numba", "numba.*"]
 ignore_missing_imports = true

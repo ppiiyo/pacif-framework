@@ -5,15 +5,34 @@ overconfident intervals. Use method='bootstrap' for dependent sequences.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import numpy as np
-from numba import njit
+
+F = TypeVar("F", bound=Callable[..., Any])
+
+if TYPE_CHECKING:
+
+    def njit(*args: Any, **kwargs: Any) -> Callable[[F], F]:
+        """Static stand-in; runtime uses numba.njit."""
+
+        def _wrap(fn: F) -> F:
+            return fn
+
+        return _wrap
+
+else:
+    from numba import njit
 
 
-@njit(cache=True)  # type: ignore[misc]
-def _calculate_mi_and_stats(events, contexts, n_u, n_s, N):
-    # type: (Any, Any, int, int, int) -> Any
+@njit(cache=True)
+def _calculate_mi_and_stats(
+    events: Any,
+    contexts: Any,
+    n_u: int,
+    n_s: int,
+    N: int,
+) -> Tuple[float, float, float, float, float, float, int]:
     """Return mi_corrected, se, ci_low, ci_high, mi_raw, var_est, m_hat."""
     joint = np.zeros((n_u, n_s), dtype=np.float64)
     for i in range(N):
@@ -37,26 +56,32 @@ def _calculate_mi_and_stats(events, contexts, n_u, n_s, N):
                 mi_raw += p * log_ratio
                 var_sum += p * (log_ratio ** 2)
 
-    # Miller-Madow bias in nats using observed non-zero cells
     bias = (m_hat - 1.0) / (2.0 * N) if m_hat >= 1 else 0.0
     mi_corrected = mi_raw + bias
 
-    # Variance of the uncorrected estimator (asymptotic, i.i.d.)
     var_est = (var_sum / N) - (mi_raw * mi_raw / N)
     if var_est < 0.0:
         var_est = 0.0
         se = 0.0
     else:
-        se = np.sqrt(var_est)
+        se = float(np.sqrt(var_est))
 
     ci_low = mi_corrected - 1.96 * se
     if ci_low < 0.0:
         ci_low = 0.0
     ci_high = mi_corrected + 1.96 * se
-    return mi_corrected, se, ci_low, ci_high, mi_raw, var_est, m_hat
+    return (
+        float(mi_corrected),
+        float(se),
+        float(ci_low),
+        float(ci_high),
+        float(mi_raw),
+        float(var_est),
+        int(m_hat),
+    )
 
 
-# JIT warmup
+# JIT warmup (no-op under TYPE_CHECKING path in editors; real numba at runtime)
 _warmup_e = np.array([0, 1, 2], dtype=np.int64)
 _warmup_c = np.array([0, 1, 0], dtype=np.int64)
 _calculate_mi_and_stats(_warmup_e, _warmup_c, 3, 2, 3)
@@ -81,7 +106,7 @@ def _moving_block_bootstrap_ci(
     block_length: int,
     n_resamples: int,
     seed: int,
-) -> tuple:
+) -> Tuple[float, float]:
     """Percentile CI via moving-block bootstrap of the MI estimate."""
     rng = np.random.default_rng(seed)
     bl = max(1, min(block_length, N))
@@ -198,9 +223,7 @@ def estimate_alignment(
     rel_ci = ci_w / (abs(float(mi)) + 1e-8)
 
     reliable = bool(
-        (not variance_degenerate)
-        and (ci_w < 0.30)
-        and (rel_ci < 0.50)
+        (not variance_degenerate) and (ci_w < 0.30) and (rel_ci < 0.50)
     )
 
     out: Dict[str, Any] = {

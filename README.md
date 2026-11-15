@@ -1,4 +1,4 @@
-# PACIF v3.0
+# PACIF v3.1
 
 **Predictive Alignment & Causal Information Flow**
 
@@ -40,11 +40,12 @@ It is deliberately **not** a measure of causality, user wellbeing, or “manipul
 
 ### Core capabilities
 
-- **Bias-corrected Mutual Information** — Miller–Madow correction removes first-order finite-sample bias.
-- **Strict reliability diagnostics** — automatically flags unstable estimates via confidence-interval width thresholds.
-- **Cumulative drift detection** — CUSUM + Page-Hinkley for non-stationary shifts in the alignment signal.
-- **Regulator-ready audit reports** — YAML output with exclusion-rate, category-inflation, skew, and drift flags (schema 1.2).
-- **Causal integration pattern** — synthetic PACIF-like features reduce Doubly Robust (DR) estimator bias in an illustrative simulation; see `causal_integration.py` (features are predictive by construction — not evidence on real data).
+- **Bias-corrected Mutual Information** — Miller–Madow correction removes first-order finite-sample bias (nats; observed joint cells).
+- **Cardinality guard** — high unique-label / small-N regimes return `unreliable` instead of overconfident MI.
+- **Strict reliability diagnostics** — CI width thresholds; zero/degenerate variance forces `reliable=False`.
+- **Drift detection** — CUSUM and Page–Hinkley with pre-drift baseline and rebaselining window.
+- **Regulator-ready audit reports** — YAML schema 1.2 with parameters block, exclusion-rate, category-inflation, skew, and drift flags.
+- **Causal integration pattern** — synthetic PACIF-like features in an illustrative DR simulation; see `causal_integration.py` (not evidence on real data).
 
 **Performance (reference):** >1,900 sessions/sec, p95 latency <1 ms (`examples/benchmark_throughput.py`).
 
@@ -59,7 +60,8 @@ PACIF measures **statistical predictability**, not causality and not wellbeing.
 - The framework is designed to be honest about uncertainty: unreliable estimates are explicitly marked.
 
 Full practitioner guide: **[docs/INTERPRETATION.md](docs/INTERPRETATION.md)**  
-Outreach one-pager: **[docs/POSITIONING.md](docs/POSITIONING.md)**
+Outreach one-pager: **[docs/POSITIONING.md](docs/POSITIONING.md)**  
+Release process: **[docs/RELEASING.md](docs/RELEASING.md)**
 
 ---
 
@@ -82,18 +84,19 @@ git clone https://github.com/ppiiyo/pacif-framework.git
 cd pacif-framework
 pip install -e ".[demo,dev]"
 pytest tests/ -v
+mypy pacif_core
 ```
 
 ### Minimal usage
 
 ```python
-from pacif_core import estimate_alignment, DriftDetector, AuditReporter
+from pacif_core import estimate_alignment, DriftDetector, PageHinkleyDetector, AuditReporter
 import numpy as np
 
 events   = np.array([0, 1, 0, 2, 1, 0, 2, 1] * 20)
 contexts = np.array([0, 1, 0, 1, 1, 0, 2, 1] * 20)
 
-result = estimate_alignment(events, contexts)
+result = estimate_alignment(events, contexts, max_events=None)
 
 if result["status"] == "success":
     print(f"MI: {result['mi_estimate']:.3f} nats")
@@ -132,20 +135,37 @@ Deep dive: [docs/INTERPRETATION.md](docs/INTERPRETATION.md)
 ```
 pacif-framework/
 ├── pacif_core/
+│   ├── _version.py       # single version source (3.1.x)
 │   ├── estimator.py      # Bias-corrected MI + reliability
 │   ├── drift.py          # CUSUM + Page-Hinkley detectors
 │   └── audit.py          # YAML audit reporter (schema 1.2)
-├── tests/                # pytest suite
+├── tests/
 ├── docs/
 │   ├── INTERPRETATION.md
-│   └── POSITIONING.md
+│   ├── POSITIONING.md
+│   └── RELEASING.md
 ├── examples/
-│   ├── basic_usage.py
-│   └── benchmark_throughput.py
-├── app.py                # Streamlit demo
-├── causal_integration.py # DR estimator illustration (synthetic)
-└── .github/workflows/ci.yml
+├── app.py
+├── causal_integration.py
+└── .github/workflows/
+    ├── ci.yml            # ruff + mypy + pytest-cov (3.9–3.12)
+    └── publish.yml       # tag v* → GitHub Release + PyPI
 ```
+
+---
+
+## Releasing
+
+Version lives in `pacif_core/_version.py`. Tag must match:
+
+```bash
+git tag -a v3.1.0 -m "PACIF v3.1.0"
+git push origin v3.1.0
+```
+
+Details: [docs/RELEASING.md](docs/RELEASING.md).
+
+**Note:** Numeric MI outputs differ from 3.0.x (Miller–Madow units, cardinality guard, sampling). Re-baseline thresholds calibrated on 3.0.x.
 
 ---
 
@@ -175,7 +195,7 @@ If you use PACIF in research, audits, or product workflows, please cite:
 ```bibtex
 @software{pacif_v3_2026,
   author       = {ppiiyo},
-  title        = {PACIF v3.0: Predictive Alignment \& Causal Information Flow},
+  title        = {PACIF v3.1: Predictive Alignment \& Causal Information Flow},
   year         = {2026},
   url          = {https://github.com/ppiiyo/pacif-framework},
   doi          = {10.5281/zenodo.19902776},

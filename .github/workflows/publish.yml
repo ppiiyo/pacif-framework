@@ -16,11 +16,11 @@ permissions:
 jobs:
   publish:
     name: Release and publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: pypi
     permissions:
-      id-token: write   # PyPI trusted publishing (OIDC)
-      contents: write   # create GitHub Release from tag
+      id-token: write
+      contents: write
 
     steps:
       - name: Checkout
