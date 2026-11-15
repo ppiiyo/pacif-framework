@@ -14,10 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI lower bound clipped at 0; docstring notes i.i.d. assumption for asymptotic intervals.
 - Input validation: 1-d equal-length arrays (`length_mismatch` / `invalid_shape`).
 - Subsampling via seeded `rng.choice` (was deterministic `linspace`, aliasing period-8 patterns); `max_events=None` disables the cap.
+- Drift alarm now returns the **pre-drift** baseline (was overwritten with the triggering value).
+- Drift history bounded with `deque(maxlen=50)` (was unbounded list).
 
 ### Added
 - Optional `method="bootstrap"` (moving-block bootstrap CI, seeded).
 - Parameters: `min_expected_cell_count`, `sample_seed`, `method`, `block_length`, `n_resamples`.
+- `PageHinkleyDetector` (two-sided Page–Hinkley) with the same warmup/rebaseline protocol as CUSUM.
+- Post-alarm rebaselining window (50 observations) before baseline is reset to the new regime mean.
 
 ### Changed
 - **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
