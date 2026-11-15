@@ -5,23 +5,24 @@ overconfident intervals. Use method='bootstrap' for dependent sequences.
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import numpy as np
 
-try:
-    from numba import njit as _numba_njit
-except ImportError:  # pragma: no cover - runtime requires numba
-    def _numba_njit(*_args: Any, **_kwargs: Any) -> Callable[..., Any]:
-        def _decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
+F = TypeVar("F", bound=Callable[..., Any])
+
+if TYPE_CHECKING:
+
+    def njit(*args: Any, **kwargs: Any) -> Callable[[F], F]:
+        """Static stand-in; runtime uses numba.njit."""
+
+        def _wrap(fn: F) -> F:
             return fn
 
-        return _decorator
+        return _wrap
 
-
-def njit(*args: Any, **kwargs: Any) -> Callable[..., Any]:
-    """Typed wrapper around numba.njit for static analysis."""
-    return _numba_njit(*args, **kwargs)  # type: ignore[no-any-return]
+else:
+    from numba import njit
 
 
 @njit(cache=True)
@@ -80,7 +81,7 @@ def _calculate_mi_and_stats(
     )
 
 
-# JIT warmup
+# JIT warmup (no-op under TYPE_CHECKING path in editors; real numba at runtime)
 _warmup_e = np.array([0, 1, 2], dtype=np.int64)
 _warmup_c = np.array([0, 1, 0], dtype=np.int64)
 _calculate_mi_and_stats(_warmup_e, _warmup_c, 3, 2, 3)
