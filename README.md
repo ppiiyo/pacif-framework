@@ -2,7 +2,7 @@
 
 **Predictive Alignment & Causal Information Flow**
 
-> Measures how strongly algorithms shape user behavior — and whether that signal is reliable.
+> Measures statistical coupling between user behavior and system context, and assesses the reliability of that estimate.
 
 [![Streamlit Demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pacif-demo.streamlit.app)
 [![PyPI](https://img.shields.io/pypi/v/pacif-framework.svg)](https://pypi.org/project/pacif-framework/)
