@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Post-alarm rebaselining window (50 observations) before baseline is reset to the new regime mean.
 - Audit schema **1.2**: `parameters` block (all thresholds), optional `context` merged into `metadata`.
 - Single version source: `pacif_core/_version.py` (`3.1.0`); dynamic version in `pyproject.toml`.
+- CI: `mypy pacif_core` (numba `ignore_missing_imports` only); `pytest --cov=pacif_core`.
 
 ### Changed
 - **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
