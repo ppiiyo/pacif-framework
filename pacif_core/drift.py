@@ -79,11 +79,14 @@ class DriftDetector:
 
 
 class PageHinkleyDetector:
-    """Two-sided Page-Hinkley detector.
+    """Two-sided Page-Hinkley detector against a fixed baseline mean.
 
-    Tracks cumulative deviations from a running mean. Alarms when
-    ``m_t - min(m) > lambda_`` (upward) or ``max(m) - m_t > lambda_`` (downward).
-    Same warmup / rebaseline protocol as :class:`DriftDetector`.
+    After warmup the baseline is fixed until an alarm. Cumulative sum uses
+    ``value - baseline - delta`` (not a continuously adapting post-warmup mean),
+    which keeps false alarms low on stationary noise while still catching steps.
+
+    Alarms when ``m_t - min(m) > lambda_`` (up) or ``max(m) - m_t > lambda_`` (down).
+    Same rebaseline protocol as :class:`DriftDetector`.
 
     Thresholds are absolute (nats when applied to MI). Recommended calibration:
     ``lambda_ ≈ 3 * median SE`` of the upstream estimator.
@@ -103,8 +106,6 @@ class PageHinkleyDetector:
         self.history: Deque[float] = deque(maxlen=50)
         self.n_obs = 0
         self.baseline: Optional[float] = None
-        self._mean = 0.0
-        self._count = 0
         self._m = 0.0
         self._m_min = 0.0
         self._m_max = 0.0
@@ -112,8 +113,6 @@ class PageHinkleyDetector:
         self._rebase_buf: List[float] = []
 
     def _reset_ph(self) -> None:
-        self._mean = 0.0
-        self._count = 0
         self._m = 0.0
         self._m_min = 0.0
         self._m_max = 0.0
@@ -139,9 +138,8 @@ class PageHinkleyDetector:
         if self.baseline is None:
             self.baseline = sum(self.history) / float(len(self.history))
 
-        self._count += 1
-        self._mean += (value - self._mean) / float(self._count)
-        self._m += value - self._mean - self.delta
+        # Fixed-baseline PH: reference is the pre-regime mean, not a chasing mean.
+        self._m += value - float(self.baseline) - self.delta
         if self._m < self._m_min:
             self._m_min = self._m
         if self._m > self._m_max:
