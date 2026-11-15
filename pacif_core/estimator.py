@@ -11,8 +11,9 @@ import numpy as np
 from numba import njit
 
 
-@njit(cache=True)
+@njit(cache=True)  # type: ignore[misc]
 def _calculate_mi_and_stats(events, contexts, n_u, n_s, N):
+    # type: (Any, Any, int, int, int) -> Any
     """Return mi_corrected, se, ci_low, ci_high, mi_raw, var_est, m_hat."""
     joint = np.zeros((n_u, n_s), dtype=np.float64)
     for i in range(N):
@@ -61,7 +62,7 @@ _warmup_c = np.array([0, 1, 0], dtype=np.int64)
 _calculate_mi_and_stats(_warmup_e, _warmup_c, 3, 2, 3)
 
 
-def _as_1d(name: str, arr) -> Union[np.ndarray, Dict[str, Any]]:
+def _as_1d(name: str, arr: Any) -> Union[np.ndarray, Dict[str, Any]]:
     try:
         out = np.asarray(arr)
     except (TypeError, ValueError):
@@ -80,7 +81,7 @@ def _moving_block_bootstrap_ci(
     block_length: int,
     n_resamples: int,
     seed: int,
-):
+) -> tuple:
     """Percentile CI via moving-block bootstrap of the MI estimate."""
     rng = np.random.default_rng(seed)
     bl = max(1, min(block_length, N))
@@ -104,8 +105,8 @@ def _moving_block_bootstrap_ci(
 
 
 def estimate_alignment(
-    events,
-    contexts,
+    events: Any,
+    contexts: Any,
     min_events: int = 30,
     max_events: Optional[int] = 500,
     min_expected_cell_count: float = 5.0,
@@ -113,7 +114,7 @@ def estimate_alignment(
     method: str = "asymptotic",
     block_length: int = 20,
     n_resamples: int = 200,
-):
+) -> Dict[str, Any]:
     """Estimate predictive alignment via bias-corrected mutual information.
 
     Parameters

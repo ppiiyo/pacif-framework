@@ -7,7 +7,7 @@ upstream estimator.
 from __future__ import annotations
 
 from collections import deque
-from typing import Deque, Dict, List, Optional
+from typing import Any, Deque, Dict, List, Optional
 
 
 class DriftDetector:
@@ -24,7 +24,7 @@ class DriftDetector:
         slack: float = 0.005,
         warmup: int = 50,
         rebaseline_window: int = 50,
-    ):
+    ) -> None:
         self.threshold = float(threshold)
         self.slack = float(slack)
         self.warmup = int(warmup)
@@ -37,7 +37,7 @@ class DriftDetector:
         self._rebaselining = False
         self._rebase_buf: List[float] = []
 
-    def update(self, value: float) -> Dict:
+    def update(self, value: float) -> Dict[str, Any]:
         value = float(value)
         self.history.append(value)
         self.n_obs += 1
@@ -95,7 +95,7 @@ class PageHinkleyDetector:
         lambda_: float = 0.15,
         warmup: int = 50,
         rebaseline_window: int = 50,
-    ):
+    ) -> None:
         self.delta = float(delta)
         self.lambda_ = float(lambda_)
         self.warmup = int(warmup)
@@ -118,7 +118,7 @@ class PageHinkleyDetector:
         self._m_min = 0.0
         self._m_max = 0.0
 
-    def update(self, value: float) -> Dict:
+    def update(self, value: float) -> Dict[str, Any]:
         value = float(value)
         self.history.append(value)
         self.n_obs += 1
