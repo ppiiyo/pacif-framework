@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pacif-framework"
-version = "3.0.1"
+dynamic = ["version"]
 description = "Statistically rigorous framework for human–algorithm predictive alignment. Measures how strongly algorithms shape user behavior — and whether that signal is reliable."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -76,6 +76,9 @@ Repository = "https://github.com/ppiiyo/pacif-framework"
 DOI = "https://doi.org/10.5281/zenodo.19902776"
 Demo = "https://pacif-demo.streamlit.app"
 Changelog = "https://github.com/ppiiyo/pacif-framework/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = {attr = "pacif_core._version.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["."]

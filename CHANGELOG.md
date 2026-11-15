@@ -16,15 +16,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subsampling via seeded `rng.choice` (was deterministic `linspace`, aliasing period-8 patterns); `max_events=None` disables the cap.
 - Drift alarm now returns the **pre-drift** baseline (was overwritten with the triggering value).
 - Drift history bounded with `deque(maxlen=50)` (was unbounded list).
+- Audit median uses `statistics.median` (even-length half-sum; was lower middle index only).
 
 ### Added
 - Optional `method="bootstrap"` (moving-block bootstrap CI, seeded).
 - Parameters: `min_expected_cell_count`, `sample_seed`, `method`, `block_length`, `n_resamples`.
 - `PageHinkleyDetector` (two-sided Page–Hinkley) with the same warmup/rebaseline protocol as CUSUM.
 - Post-alarm rebaselining window (50 observations) before baseline is reset to the new regime mean.
+- Audit schema **1.2**: `parameters` block (all thresholds), optional `context` merged into `metadata`.
+- Single version source: `pacif_core/_version.py` (`3.1.0`); dynamic version in `pyproject.toml`.
 
 ### Changed
 - **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
+- Audit report `framework` string follows package version (`PACIF v3.1.0`); default schema `1.1` → `1.2`.
 
 ## [3.0.1] - 2026-11-09
 
