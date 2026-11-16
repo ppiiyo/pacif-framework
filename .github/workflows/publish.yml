@@ -1,8 +1,8 @@
 name: Publish to PyPI
 
-# Auto-release: push a tag like v3.1.0 → GitHub Release + PyPI upload.
-# Manual: workflow_dispatch from Actions tab.
+# Tag path: push vX.Y.Z → tests → GitHub Release → PyPI.
 # Filename must remain publish.yml (PyPI trusted publisher).
+# Environment must remain pypi.
 
 on:
   push:
@@ -25,30 +25,71 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: Guard workflow_dispatch to main only
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "::error::workflow_dispatch is only allowed on main (got ${GITHUB_REF})"
+            exit 1
+          fi
+
+      - name: Read package version without importing pacif_core
+        id: ver
+        run: |
+          # Avoid "from pacif_core._version import ..." — that executes
+          # pacif_core/__init__.py and requires yaml/numba before install.
+          PKG=$(python -c "import runpy; print(runpy.run_path('pacif_core/_version.py')['__version__'])")
+          echo "pkg=${PKG}" >> "$GITHUB_OUTPUT"
+          echo "package version=${PKG}"
+
       - name: Verify tag matches package version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
-          PKG="$(python -c "from pacif_core._version import __version__; print(__version__)")"
+          PKG="${{ steps.ver.outputs.pkg }}"
           echo "tag=$TAG package=$PKG"
           if [ "$TAG" != "$PKG" ]; then
-            echo "::error::Tag v$TAG does not match pacif_core._version.__version__=$PKG"
+            echo "::error::Tag v$TAG does not match pacif_core/_version.py __version__=$PKG"
             exit 1
           fi
 
-      - name: Install build tools
+      - name: Verify version is newer than latest tag (dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          PKG="${{ steps.ver.outputs.pkg }}"
+          LATEST=$(git tag -l 'v*' --sort=-v:refname | head -n1 | sed 's/^v//')
+          echo "package=$PKG latest_tag=${LATEST:-none}"
+          if [ -n "$LATEST" ] && [ "$PKG" = "$LATEST" ]; then
+            echo "::error::Package version $PKG already has tag v$LATEST. Bump _version.py before dispatch."
+            exit 1
+          fi
+
+      - name: Install package and dev tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install build
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check pacif_core tests examples
+
+      - name: Typecheck (mypy)
+        run: mypy pacif_core
+
+      - name: Test (pytest)
+        run: pytest tests/ -q
 
       - name: Build sdist and wheel
-        run: python -m build
+        run: |
+          python -m pip install build
+          python -m build
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
