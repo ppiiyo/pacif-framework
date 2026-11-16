@@ -9,6 +9,11 @@ from pacif_core import (
     __version__,
 )
 
+# 3.1 cardinality guard: N >= min_expected_cell_count * n_u * n_s
+# With 4 labels per side and cell_count=3 → need N >= 48; default window 80.
+_N_LABELS = 4
+_MIN_CELL = 3.0
+
 st.set_page_config(
     page_title=f"PACIF v{__version__} Demo",
     page_icon="🔬",
@@ -23,7 +28,9 @@ st.caption(
 
 st.info(
     "**Synthetic demo.** Each Run generates new random sessions in-browser. "
-    "Nothing is loaded from disk or a database; numbers change every run."
+    "Nothing is loaded from disk or a database; numbers change every run.\n\n"
+    f"Estimator guard: window must be large enough for "
+    f"~{_N_LABELS}×{_N_LABELS} labels (N ≥ {_MIN_CELL * _N_LABELS * _N_LABELS:.0f})."
 )
 
 st.markdown(
@@ -44,21 +51,20 @@ with st.sidebar:
 
     with st.form("analysis_form"):
         n_sessions = st.slider("Sample Size (Sessions)", 50, 500, 200)
-        session_len = st.slider("Window Size (Events)", 30, 200, 60)
+        session_len = st.slider(
+            "Window Size (Events)",
+            min_value=50,
+            max_value=300,
+            value=100,
+            help=f"Need ≥ {_MIN_CELL * _N_LABELS * _N_LABELS:.0f} events for "
+            f"{_N_LABELS}×{_N_LABELS} categories (3.1 cardinality guard).",
+        )
         seed = st.number_input(
             "Random seed (reproducible runs)",
             min_value=0,
             max_value=10_000,
             value=42,
             step=1,
-        )
-        st.selectbox(
-            "Reliability note",
-            [
-                "CI gates use library defaults (ci_w < 0.30, rel_ci < 0.50)",
-            ],
-            index=0,
-            disabled=True,
         )
         submitted = st.form_submit_button("🚀 Run Analysis", use_container_width=True)
 
@@ -68,21 +74,34 @@ if submitted:
         results = []
         detector = DriftDetector()
         progress_bar = st.progress(0)
+        status_counts: dict = {}
 
         for i in range(n_sessions):
-            ev = rng.integers(0, 5, session_len)
+            # Coupled synthetic pair: context ≈ action with 20% noise
+            ev = rng.integers(0, _N_LABELS, session_len)
             mask = rng.random(session_len) < 0.2
             ctx = np.copy(ev)
             n_flip = int(np.sum(mask))
             if n_flip > 0:
-                ctx[mask] = rng.integers(0, 5, size=n_flip)
+                ctx[mask] = rng.integers(0, _N_LABELS, size=n_flip)
 
-            res = estimate_alignment(ev, ctx, sample_seed=int(seed) + i)
+            res = estimate_alignment(
+                ev,
+                ctx,
+                max_events=None,
+                min_expected_cell_count=_MIN_CELL,
+                sample_seed=int(seed) + i,
+            )
             res["id"] = i
+            reason = res.get("reason") or res.get("status")
+            status_counts[reason] = status_counts.get(reason, 0) + 1
 
-            mi = res.get("mi_estimate", 0.0) or 0.0
-            drift_res = detector.update(float(mi))
-            res["drift"] = drift_res.get("drift", False)
+            mi = res.get("mi_estimate")
+            if mi is not None:
+                drift_res = detector.update(float(mi))
+                res["drift"] = drift_res.get("drift", False)
+            else:
+                res["drift"] = False
 
             results.append(res)
             progress_bar.progress((i + 1) / n_sessions)
@@ -148,12 +167,21 @@ if submitted:
             st.subheader("📋 Audit Summary")
             audit_yaml = AuditReporter.generate_report(
                 results,
-                context={"demo": True, "seed": int(seed), "n_sessions": n_sessions},
+                context={
+                    "demo": True,
+                    "seed": int(seed),
+                    "n_sessions": n_sessions,
+                    "window": session_len,
+                },
             )
             with st.expander("View Technical Audit Report (YAML)"):
                 st.code(audit_yaml, language="yaml")
         else:
-            st.error("No successful estimates. Try a larger sample size or window.")
+            st.error(
+                "No successful estimates. "
+                "Increase window size (cardinality guard) or check status breakdown below."
+            )
+            st.json(status_counts)
 
 st.markdown("---")
 st.markdown(
