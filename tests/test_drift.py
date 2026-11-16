@@ -59,7 +59,6 @@ def test_alarm_returns_pre_drift_baseline():
     det = DriftDetector(threshold=0.1, slack=0.002)
     for _ in range(50):
         det.update(0.2)
-    # baseline should be ~0.2 after warmup
     alarm = None
     for _ in range(100):
         out = det.update(0.6)
@@ -98,7 +97,8 @@ def test_history_bounded_after_10000_updates():
 
 
 def test_ph_stationary_low_false_alarms():
-    det = PageHinkleyDetector(delta=0.005, lambda_=0.15)
+    # sigma≈0.02 noise needs lambda well above default (0.15 is tuned for larger MI steps).
+    det = PageHinkleyDetector(delta=0.01, lambda_=2.0)
     rng = np.random.default_rng(1)
     drift_count = 0
     for _ in range(500):
@@ -106,7 +106,7 @@ def test_ph_stationary_low_false_alarms():
         out = det.update(float(val))
         if out.get("drift"):
             drift_count += 1
-    assert drift_count <= 3
+    assert drift_count <= 2
 
 
 def test_ph_detects_step_up_and_rebaselines():
