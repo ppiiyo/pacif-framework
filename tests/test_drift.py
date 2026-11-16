@@ -96,17 +96,25 @@ def test_history_bounded_after_10000_updates():
     assert len(det.history) <= 50
 
 
-def test_ph_stationary_low_false_alarms():
-    # sigma≈0.02 noise needs lambda well above default (0.15 is tuned for larger MI steps).
-    det = PageHinkleyDetector(delta=0.01, lambda_=2.0)
+def test_ph_stationary_sigma_005_zero_alarms():
+    """Defaults: sigma=0.005 → no alarms on 10 seeds × 500 steps."""
+    for seed in range(10):
+        det = PageHinkleyDetector(delta=0.005, lambda_=0.15)
+        rng = np.random.default_rng(seed)
+        for _ in range(500):
+            out = det.update(float(0.4 + rng.normal(0, 0.005)))
+            assert out.get("drift") is False, f"false alarm seed={seed}"
+
+
+def test_ph_stationary_sigma_02_arl_lambda():
+    """sigma=0.02, lambda_=0.8 (ARL≈200): at most 3 alarms in 500 steps."""
+    det = PageHinkleyDetector(delta=0.005, lambda_=0.8)
     rng = np.random.default_rng(1)
     drift_count = 0
     for _ in range(500):
-        val = 0.4 + rng.normal(0, 0.02)
-        out = det.update(float(val))
-        if out.get("drift"):
+        if det.update(float(0.4 + rng.normal(0, 0.02))).get("drift"):
             drift_count += 1
-    assert drift_count <= 2
+    assert drift_count <= 3
 
 
 def test_ph_detects_step_up_and_rebaselines():
@@ -133,12 +141,15 @@ def test_ph_detects_step_down():
     for _ in range(60):
         det.update(0.6)
     detected_at = None
+    alarm = None
     for i in range(80):
         out = det.update(0.2)
         if out.get("drift"):
             detected_at = i
+            alarm = out
             break
     assert detected_at is not None and detected_at < 30
+    assert alarm["baseline"] == pytest.approx(0.6, abs=0.02)
 
 
 def test_ph_history_bounded():
@@ -146,3 +157,25 @@ def test_ph_history_bounded():
     for _ in range(10000):
         det.update(0.4)
     assert len(det.history) <= 50
+
+
+def test_ph_and_cusum_differ_on_ramp():
+    """Slow ramp: classic PH (running mean) vs CUSUM (fixed baseline) diverge."""
+    cusum = DriftDetector(threshold=0.12, slack=0.005)
+    ph = PageHinkleyDetector(delta=0.005, lambda_=0.15)
+    cusum_alarms = []
+    ph_alarms = []
+    # warmup flat
+    for _ in range(60):
+        cusum.update(0.3)
+        ph.update(0.3)
+    # linear ramp
+    for i in range(120):
+        x = 0.3 + 0.004 * i
+        if cusum.update(x).get("drift"):
+            cusum_alarms.append(i)
+        if ph.update(x).get("drift"):
+            ph_alarms.append(i)
+    assert cusum_alarms != ph_alarms, (
+        f"expected different alarm sequences; both={cusum_alarms}"
+    )
