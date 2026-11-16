@@ -79,11 +79,15 @@ class DriftDetector:
 
 
 class PageHinkleyDetector:
-    """Two-sided Page-Hinkley detector.
+    """Two-sided Page–Hinkley detector (reflected cumulative sums).
 
-    Tracks cumulative deviations from a running mean. Alarms when
-    ``m_t - min(m) > lambda_`` (upward) or ``max(m) - m_t > lambda_`` (downward).
-    Same warmup / rebaseline protocol as :class:`DriftDetector`.
+    Against a fixed baseline after warmup::
+
+        m+ = max(0, m+ + (x - baseline - delta))
+        m- = max(0, m- + (baseline - x - delta))
+
+    Alarm when ``m+ > lambda_`` or ``m- > lambda_``. Same rebaseline protocol
+    as :class:`DriftDetector`.
 
     Thresholds are absolute (nats when applied to MI). Recommended calibration:
     ``lambda_ ≈ 3 * median SE`` of the upstream estimator.
@@ -103,20 +107,14 @@ class PageHinkleyDetector:
         self.history: Deque[float] = deque(maxlen=50)
         self.n_obs = 0
         self.baseline: Optional[float] = None
-        self._mean = 0.0
-        self._count = 0
-        self._m = 0.0
-        self._m_min = 0.0
-        self._m_max = 0.0
+        self._m_pos = 0.0
+        self._m_neg = 0.0
         self._rebaselining = False
         self._rebase_buf: List[float] = []
 
     def _reset_ph(self) -> None:
-        self._mean = 0.0
-        self._count = 0
-        self._m = 0.0
-        self._m_min = 0.0
-        self._m_max = 0.0
+        self._m_pos = 0.0
+        self._m_neg = 0.0
 
     def update(self, value: float) -> Dict[str, Any]:
         value = float(value)
@@ -139,18 +137,12 @@ class PageHinkleyDetector:
         if self.baseline is None:
             self.baseline = sum(self.history) / float(len(self.history))
 
-        self._count += 1
-        self._mean += (value - self._mean) / float(self._count)
-        self._m += value - self._mean - self.delta
-        if self._m < self._m_min:
-            self._m_min = self._m
-        if self._m > self._m_max:
-            self._m_max = self._m
+        base = float(self.baseline)
+        self._m_pos = max(0.0, self._m_pos + (value - base - self.delta))
+        self._m_neg = max(0.0, self._m_neg + (base - value - self.delta))
 
-        up = self._m - self._m_min > self.lambda_
-        down = self._m_max - self._m > self.lambda_
-        if up or down:
-            pre_baseline = float(self.baseline)
+        if self._m_pos > self.lambda_ or self._m_neg > self.lambda_:
+            pre_baseline = base
             self._reset_ph()
             self._rebaselining = True
             self._rebase_buf = []
