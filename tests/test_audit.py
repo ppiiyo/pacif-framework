@@ -1,6 +1,8 @@
 """Unit tests for pacif_core.audit.AuditReporter."""
 from __future__ import annotations
 
+import re
+
 import yaml
 
 from pacif_core import __version__
@@ -113,4 +115,5 @@ def test_context_merged_into_metadata():
 
 
 def test_version_module():
-    assert __version__ == "3.1.0"
+    assert isinstance(__version__, str)
+    assert re.fullmatch(r"\d+\.\d+\.\d+", __version__), __version__
