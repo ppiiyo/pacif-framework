@@ -7,8 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0] - Unreleased
 
-> Set the date on this heading when tagging `v3.1.0` (replace Unreleased).
-
 ### Fixed
 - Miller–Madow bias now in **nats** using observed non-zero joint cells `(m_hat - 1) / (2N)` (was bits-scale full grid `(Ku-1)(Ks-1)/(2N ln 2)`, overstating bias by ~1.44× and on sparse tables).
 - Cardinality guard: `N < min_expected_cell_count * n_u * n_s` → `unreliable` / `high_cardinality` (default cell count 5).
@@ -18,23 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subsampling via seeded `rng.choice` (was deterministic `linspace`, aliasing period-8 patterns); `max_events=None` disables the cap.
 - Drift alarm now returns the **pre-drift** baseline (was overwritten with the triggering value).
 - Drift history bounded with `deque(maxlen=50)` (was unbounded list).
-- Audit median uses `statistics.median` (even-length half-sum; prior custom path used **upper** middle index `n//2` for odd-length lists, not a lower-middle-only pick).
+- Audit median uses `statistics.median` (even-length half-sum; was lower middle index only).
 - `generate_pacif_features` now receives the dataset `seed` from `synthetic_causal_dataset` (was ignored).
+- Publish workflow version check no longer imports `pacif_core` (uses `runpy` on `_version.py`); avoids `ModuleNotFoundError` for yaml/numba before install.
 
 ### Added
 - Optional `method="bootstrap"` (moving-block bootstrap CI, seeded).
 - Parameters: `min_expected_cell_count`, `sample_seed`, `method`, `block_length`, `n_resamples`.
-- `PageHinkleyDetector` with the same warmup/rebaseline protocol as CUSUM (see drift PR for classic PH vs prior CUSUM-equivalent stand-in).
+- `PageHinkleyDetector` (two-sided Page–Hinkley) with the same warmup/rebaseline protocol as CUSUM.
 - Post-alarm rebaselining window (50 observations) before baseline is reset to the new regime mean.
 - Audit schema **1.2**: `parameters` block (all thresholds), optional `context` merged into `metadata`.
 - Single version source: `pacif_core/_version.py` (`3.1.0`); dynamic version in `pyproject.toml`.
-- CI: `mypy pacif_core`; `pytest --cov=pacif_core`.
-- `causal_integration.monte_carlo` (100 seeds).
+- CI: `mypy pacif_core` (numba `ignore_missing_imports` only); `pytest --cov=pacif_core`.
+- `causal_integration.monte_carlo` (100 seeds): mean ± std of |bias| with/without synthetic features.
+- Publish workflow runs ruff + mypy + pytest before build/upload; `workflow_dispatch` restricted to `main`.
 
 ### Changed
 - **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
 - Audit report `framework` string follows package version (`PACIF v3.1.0`); default schema `1.1` → `1.2`.
-- README / POSITIONING: soft numeric claims; coupling language per INTERPRETATION §3.
+- README / POSITIONING: removed non-reproducible “40–65%” and “~89%” claims; Miller–Madow described as first-order bias correction; DR result framed as illustrative synthetic simulation only.
+- Public language aligned with INTERPRETATION §3 (coupling / predictability, not “shapes” / “causes”).
+- Release path documented as **tag → tests → release** (`docs/RELEASING.md`); manual dispatch is emergency-only.
 
 ## [3.0.1] - 2026-11-09
 
