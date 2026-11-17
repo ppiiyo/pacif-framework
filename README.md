@@ -11,199 +11,143 @@
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/ppiiyo/pacif-framework/actions/workflows/ci.yml)
 
+**60-second path:** [Demo](https://pacif-demo.streamlit.app) → `pip install pacif-framework` → run the [ranking-release case study](#case-study-ranking-release).
+
 ---
 
 ## Why PACIF exists
 
-Modern recommendation systems are **closed-loop controllers**: user actions train the model, and the model shapes future exposure. These feedback loops can produce behavioral lock-in, filter bubbles, and algorithmic influence that is hard to observe from the outside.
+Recommendation systems form **feedback loops**: behavior updates the model, the model changes future exposure. Platforms lack a small, honest metric for *how tightly* actions and context are coupled — with explicit reliability and an audit trail.
 
-Platforms, regulators, auditors, and researchers currently lack a **transparent, statistically rigorous, and audit-ready metric** that answers a simple question:
+> *How tightly is user behavior coupled to what the system shows — and can we trust that number?*
 
-> *How tightly is user behavior coupled to the system’s recommendations — and can we trust that measurement?*
+PACIF answers that with bias-corrected mutual information, reliability gates, drift detectors, and machine-readable audits. It does **not** claim causality or wellbeing.
 
-Existing approaches suffer from finite-sample bias, provide no reliability diagnostics, and are frequently misinterpreted as causal claims. PACIF was built to close that gap.
+---
+
+## Case study: ranking release
+
+Typical Trust & Safety / ranking workflow after a personalization ship:
+
+```bash
+pip install pacif-framework
+# from a clone:
+python examples/ranking_release_monitor.py
+```
+
+Compares synthetic **pre** vs **post** phases: median MI, reliability ratio, CUSUM drift, audit YAML head. Write-up: **[docs/CASE_STUDY_RANKING.md](docs/CASE_STUDY_RANKING.md)**.
+
+```python
+from pacif_core import estimate_alignment, DriftDetector, AuditReporter
+import numpy as np
+
+# U = user actions, S = system context (integer categories)
+rng = np.random.default_rng(0)
+U = rng.integers(0, 4, size=200)
+S = U.copy()
+S[rng.random(200) > 0.7] = rng.integers(0, 4, size=int((rng.random(200) > 0.7).sum()))
+
+out = estimate_alignment(U, S, max_events=None)
+print(out["status"], out.get("mi_estimate"), out.get("reliable"))
+```
 
 ---
 
 ## What PACIF measures
-
-PACIF quantifies **predictive alignment** between user actions (`U`) and system context / recommendations (`S`), with optional control for observed confounders (`C`).
-
-It is deliberately **not** a measure of causality, user wellbeing, or “manipulation”. It is a production-ready diagnostic layer that tells you:
 
 | Signal | What it tells you |
 |--------|-------------------|
 | **Signal Strength (MI)** | Intensity of statistical coupling (nats) |
 | **Reliability** | Whether the estimate is statistically stable |
 | **Drift** | Whether the relationship has shifted over time |
-| **Audit Report** | Machine-readable YAML with anti-gaming flags |
+| **Audit Report** | YAML schema 1.2 with anti-gaming flags |
 
 ### Core capabilities
 
-- **Bias-corrected Mutual Information** — Miller–Madow correction removes first-order finite-sample bias (nats; observed joint cells).
-- **Cardinality guard** — high unique-label / small-N regimes return `unreliable` instead of overconfident MI.
-- **Strict reliability diagnostics** — CI width thresholds; zero/degenerate variance forces `reliable=False`.
-- **Drift detection** — CUSUM and Page–Hinkley with pre-drift baseline and rebaselining window.
-- **Regulator-ready audit reports** — YAML schema 1.2 with parameters block, exclusion-rate, category-inflation, skew, and drift flags.
-- **Causal integration pattern** — synthetic PACIF-like features in an illustrative DR simulation; see `causal_integration.py` (not evidence on real data).
+- **Bias-corrected MI** — Miller–Madow in nats (observed joint cells).
+- **Cardinality guard** — high unique-label / small-N → `unreliable`, not overconfident MI.
+- **Reliability diagnostics** — CI width; degenerate variance → `reliable=False`.
+- **Drift** — CUSUM + classic Page–Hinkley (pre-drift baseline, rebaseline window).
+- **Audit reports** — schema 1.2 `parameters` + context metadata.
+- **Causal pattern only** — synthetic DR illustration in `causal_integration.py` (not real-data evidence).
 
-**Performance (reference):** >1,900 sessions/sec, p95 latency <1 ms (`examples/benchmark_throughput.py`).
-
----
-
-## Explicit boundaries (important)
-
-PACIF measures **statistical predictability**, not causality and not wellbeing.
-
-- High mutual information indicates strong *association / coupling*, not that the algorithm *caused* the behavior.
-- Normative or causal claims require intervention data, experimental design, or stronger identification assumptions.
-- The framework is designed to be honest about uncertainty: unreliable estimates are explicitly marked.
-
-Full practitioner guide: **[docs/INTERPRETATION.md](docs/INTERPRETATION.md)**  
-Outreach one-pager: **[docs/POSITIONING.md](docs/POSITIONING.md)**  
-Release process: **[docs/RELEASING.md](docs/RELEASING.md)**
+**Reference throughput:** >1,900 sessions/sec (`examples/benchmark_throughput.py`).
 
 ---
 
-## Quick start
+## Explicit boundaries
 
-### Live demo (no install)
+- High MI ⇒ strong *association*, not *cause*.
+- Unreliable estimates are marked; do not promote them as evidence.
+- Normative claims need experiments or stronger identification.
 
-👉 **[Launch PACIF Demo](https://pacif-demo.streamlit.app)**
+**[docs/INTERPRETATION.md](docs/INTERPRETATION.md)** · **[docs/POSITIONING.md](docs/POSITIONING.md)** · **[docs/RELEASING.md](docs/RELEASING.md)**
 
-### Install
+---
+
+## Install
 
 ```bash
 pip install pacif-framework
 ```
 
-From source (development):
+Dev:
 
 ```bash
 git clone https://github.com/ppiiyo/pacif-framework.git
 cd pacif-framework
 pip install -e ".[demo,dev]"
-pytest tests/ -v
-mypy pacif_core
+pytest tests/ -q
 ```
 
-### Minimal usage
-
-```python
-from pacif_core import estimate_alignment, DriftDetector, PageHinkleyDetector, AuditReporter
-import numpy as np
-
-events   = np.array([0, 1, 0, 2, 1, 0, 2, 1] * 20)
-contexts = np.array([0, 1, 0, 1, 1, 0, 2, 1] * 20)
-
-result = estimate_alignment(events, contexts, max_events=None)
-
-if result["status"] == "success":
-    print(f"MI: {result['mi_estimate']:.3f} nats")
-    print(f"95% CI: {result['ci_95']}")
-    print(f"Reliable: {result['reliable']}")
-```
-
-See `examples/basic_usage.py` for multi-session + drift + audit.
+Live demo (no install): **[pacif-demo.streamlit.app](https://pacif-demo.streamlit.app)**
 
 ---
 
 ## Interpreting results
 
-| Metric | Interpretation | Suggested action |
-|--------|----------------|------------------|
-| **Signal Strength (MI)** | Intensity of coupling | > 0.8 nats → investigate lock-in risk |
-| **Reliability Ratio** | % of sessions with statistically valid estimates | < 70% → increase sample size or window |
-| **Drift Status** | Significant change in the relationship over time | Drift detected → consider model recalibration |
-
-Deep dive: [docs/INTERPRETATION.md](docs/INTERPRETATION.md)
+| Metric | Reading | Suggested action |
+|--------|---------|------------------|
+| **MI (nats)** | Coupling intensity | Domain-calibrate; very high → investigate lock-in *risk* |
+| **Reliability ratio** | Share of trustworthy windows | Low → more data / fewer categories |
+| **Drift** | Non-stationarity in the relationship | Correlate with ranking/UI releases |
 
 ---
 
 ## Who this is for
 
-- **Responsible AI / Trust & Safety teams** — internal monitoring of recommendation influence and feedback loops.
-- **Platforms** (social, e-commerce, content, news) — diagnostics for personalization strength and stability.
-- **Regulators & compliance** — audit-ready, machine-readable reports with explicit reliability and anti-gaming signals.
-- **Researchers** in algorithmic accountability, fairness, and causal inference — reproducible metric + integration path with DR estimators.
-- **Auditors & third-party assessors** — independent quantification of human–algorithm coupling.
+- **Trust & Safety / Responsible AI** — monitor personalization strength after ships
+- **Ranking / product** — continuous coupling diagnostic next to engagement KPIs
+- **Auditors & compliance** — reproducible YAML with reliability and flags
+- **Researchers** — open metric + explicit non-causal boundaries (DOI on Zenodo)
 
 ---
 
 ## Project structure
 
 ```
-pacif-framework/
-├── pacif_core/
-│   ├── _version.py       # single version source (3.1.x)
-│   ├── estimator.py      # Bias-corrected MI + reliability
-│   ├── drift.py          # CUSUM + Page-Hinkley detectors
-│   └── audit.py          # YAML audit reporter (schema 1.2)
-├── tests/
-├── docs/
-│   ├── INTERPRETATION.md
-│   ├── POSITIONING.md
-│   └── RELEASING.md
-├── examples/
-├── app.py
-├── causal_integration.py
-└── .github/workflows/
-    ├── ci.yml            # ruff + mypy + pytest-cov (3.9–3.12)
-    └── publish.yml       # tag v* → GitHub Release + PyPI
+pacif_core/     estimator, drift (CUSUM + Page–Hinkley), audit (schema 1.2)
+examples/       ranking_release_monitor.py · basic_usage.py · benchmark_throughput.py
+docs/           INTERPRETATION · CASE_STUDY_RANKING · POSITIONING · RELEASING
+app.py          Streamlit demo
 ```
-
----
-
-## Releasing
-
-Version lives in `pacif_core/_version.py`. Tag must match:
-
-```bash
-git tag -a v3.1.0 -m "PACIF v3.1.0"
-git push origin v3.1.0
-```
-
-Details: [docs/RELEASING.md](docs/RELEASING.md).
-
-**Note:** Numeric MI outputs differ from 3.0.x (Miller–Madow units, cardinality guard, sampling). Re-baseline thresholds calibrated on 3.0.x.
-
----
-
-## Enterprise & audit integration
-
-For production deployments, multi-tenant audit pipelines, custom connectors, or compliance reporting support, contact:
-
-**for.smirnov.maks@gmail.com**
-
----
-
-## Contributing
-
-We welcome contributions. Algorithmic transparency should be a public good.
-
-- 🐛 [Open an issue](https://github.com/ppiiyo/pacif-framework/issues)
-- 💡 Pull requests are welcome (see [CONTRIBUTING.md](CONTRIBUTING.md))
-- 📜 Please follow the [Code of Conduct](CODE_OF_CONDUCT.md)
-- 🔒 [Security policy](SECURITY.md)
 
 ---
 
 ## Citation
 
-If you use PACIF in research, audits, or product workflows, please cite:
-
 ```bibtex
 @software{pacif_v3_2026,
-  author       = {ppiiyo},
-  title        = {PACIF v3.1: Predictive Alignment \& Causal Information Flow},
-  year         = {2026},
-  url          = {https://github.com/ppiiyo/pacif-framework},
-  doi          = {10.5281/zenodo.19902776},
-  license      = {Apache-2.0}
+  author  = {ppiiyo},
+  title   = {PACIF v3.1: Predictive Alignment \& Causal Information Flow},
+  year    = {2026},
+  url     = {https://github.com/ppiiyo/pacif-framework},
+  doi     = {10.5281/zenodo.19902776},
+  license = {Apache-2.0}
 }
 ```
 
-Also available as [`CITATION.cff`](CITATION.cff).
+[`CITATION.cff`](CITATION.cff) · Contact for pilots: **for.smirnov.maks@gmail.com**
 
 ---
 
