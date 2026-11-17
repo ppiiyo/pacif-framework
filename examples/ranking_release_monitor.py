@@ -73,10 +73,12 @@ def main() -> None:
         if r.get("status") == "success" and r.get("reliable"):
             if det.update(float(r["mi_estimate"])).get("drift"):
                 alarms += 1
-    print(f"\n=== Drift on POST stream ===")
+    print("\n=== Drift on POST stream ===")
     print(f"  CUSUM alarms : {alarms}")
 
-    report = AuditReporter.generate_report(pre + post, context={"scenario": "ranking_release_synthetic"})
+    report = AuditReporter.generate_report(
+        pre + post, context={"scenario": "ranking_release_synthetic"}
+    )
     print("\n=== Audit report (head) ===")
     print("\n".join(report.splitlines()[:25]))
     print("...")
