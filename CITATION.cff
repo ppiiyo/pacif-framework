@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "PACIF v3.0: Predictive Alignment & Causal Information Flow"
+title: "PACIF v3.1: Predictive Alignment & Causal Information Flow"
 message: "If you use PACIF in research, audits, or product workflows, please cite it."
 type: software
 authors:
@@ -11,8 +11,8 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.19902776
 license: Apache-2.0
-version: 3.0.1
-date-released: "2026-11-09"
+version: 3.1.0
+date-released: "2026-11-17"
 keywords:
   - algorithmic-accountability
   - mutual-information

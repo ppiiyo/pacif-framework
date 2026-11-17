@@ -21,17 +21,29 @@ These thresholds are **decision heuristics**, not universal laws. Calibrate agai
 
 ### Reliability
 
-An estimate is marked **reliable** when confidence-interval diagnostics pass internal thresholds (CI width and relative width).
+An estimate is marked **reliable** when confidence-interval diagnostics pass internal thresholds (CI width and relative width) **and** the run is not flagged as degenerate.
 
-- **Reliability ratio < 70%** → increase window size, sample size, or reduce category cardinality before drawing conclusions.
+Additional status / flags from the estimator (v3.1+):
+
+| Status / key | Meaning | What to do |
+|--------------|---------|------------|
+| `unreliable` / `high_cardinality` | `N < min_expected_cell_count × n_u × n_s` (default cell count 5). Too many categories for the sample. | Fewer labels, larger window, or lower `min_expected_cell_count` only with justification |
+| `variance_degenerate` | Asymptotic variance ≤ 0 (e.g. near-perfect deterministic coupling on a small grid). Forced `reliable=False`. | Do not treat MI as a precise magnitude; increase N or simplify categories |
+| `insufficient_data` / `degenerate_distribution` | Too few events or &lt;2 categories on a margin | Collect more data |
+
+- **Reliability ratio &lt; 70%** → increase window size, sample size, or reduce category cardinality before drawing conclusions.
 - Never average or promote unreliable estimates as if they were solid evidence.
 
 ### Drift
 
-Drift means the **relationship** between user actions and system context has shifted enough to trip CUSUM-style detectors.
+Drift means the **relationship** between user actions and system context has shifted enough to trip CUSUM and/or Page–Hinkley detectors.
 
+- **Pre-drift baseline:** on alarm, detectors return the baseline **before** the shift (not the triggering value).
+- **Rebaselining window (default 50):** after an alarm the detector collects a new baseline and does not arm again until that window completes.
 - Drift ≠ “users are worse off”.
 - Drift ⇒ re-check model calibration, content mix, policy changes, or data pipeline breaks.
+
+CUSUM uses a fixed post-warmup baseline; Page–Hinkley uses a running mean (classic PH). Calibrate thresholds via average run length (ARL) under stationary noise — see the `PageHinkleyDetector` docstring.
 
 ---
 
@@ -39,7 +51,7 @@ Drift means the **relationship** between user actions and system context has shi
 
 ```
 1. Is the estimate reliable?
-   └─ No  → Collect more data / widen window. Stop.
+   └─ No  → Collect more data / widen window / reduce cardinality. Stop.
    └─ Yes → Continue.
 
 2. What is the signal level?
@@ -75,7 +87,9 @@ Normative or causal claims require experiments, interventions, or stronger ident
 
 ---
 
-## 4. Audit report flags
+## 4. Audit report flags (schema 1.2)
+
+Schema **1.2** adds a `parameters` block (all decision thresholds used in the report) and optional `context` merged into `metadata` (e.g. data fingerprint, window id).
 
 | Flag | Meaning | Typical response |
 |------|---------|------------------|
@@ -95,6 +109,7 @@ Normative or causal claims require experiments, interventions, or stronger ident
 3. Re-baseline after major ranking or UI changes.
 4. Keep category vocabularies stable across audit periods when comparing trends.
 5. Pair high-MI findings with qualitative review and, where needed, A/B or holdout designs.
+6. **After upgrading from 3.0.x:** re-calibrate any thresholds or dashboards. Miller–Madow units (nats, observed cells), cardinality guard, and seeded subsampling change numeric MI and reliability rates versus 3.0.x.
 
 ---
 
