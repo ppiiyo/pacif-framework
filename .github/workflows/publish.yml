@@ -44,8 +44,6 @@ jobs:
       - name: Read package version without importing pacif_core
         id: ver
         run: |
-          # Avoid "from pacif_core._version import ..." — that executes
-          # pacif_core/__init__.py and requires yaml/numba before install.
           PKG=$(python -c "import runpy; print(runpy.run_path('pacif_core/_version.py')['__version__'])")
           echo "pkg=${PKG}" >> "$GITHUB_OUTPUT"
           echo "package version=${PKG}"
@@ -101,3 +99,7 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Idempotent re-runs: do not fail if this exact file is already on PyPI
+          skip-existing: true
+          verbose: true

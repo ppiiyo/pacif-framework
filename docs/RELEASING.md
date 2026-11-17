@@ -10,7 +10,8 @@ Workflow file name **`publish.yml`** and environment **`pypi`** must not change
 1. `pacif_core/_version.py` holds the release version (single source of truth).
 2. `CHANGELOG.md` has a dated section for that version.
 3. CI on `main` is green.
-4. Tag matches package version exactly (`v3.1.0` ↔ `__version__ = "3.1.0"`).
+4. Tag matches package version exactly (`v3.1.1` ↔ `__version__ = "3.1.1"`).
+5. That version is **not** already on PyPI (PyPI forbids re-upload of the same filename).
 
 ## Publish (tag → tests → release)
 
@@ -24,24 +25,22 @@ git push origin vX.Y.Z
 
 Watch **Actions → Publish to PyPI**. The workflow:
 
-1. Reads version via `runpy` on `_version.py` (no package import — avoids needing
-   numba/yaml before install).
+1. Reads version via `runpy` on `_version.py` (no package import).
 2. Checks tag == package version.
 3. Installs `.[dev]`, runs **ruff**, **mypy**, **pytest**.
 4. Builds sdist/wheel.
 5. Creates the GitHub Release (artifacts attached).
-6. Publishes to PyPI via OIDC trusted publishing.
-
-On success:
-
-- GitHub Release `vX.Y.Z`
-- Package on https://pypi.org/project/pacif-framework/
+6. Publishes to PyPI via OIDC (`skip-existing: true` so re-runs do not fail on duplicates).
 
 ## workflow_dispatch
 
 Emergency-only. Allowed **only on `main`**. Refuses if package version already
-matches the latest `v*` tag (bump `_version.py` first). Prefer the tag path for
-production releases.
+matches the latest `v*` tag. Prefer the tag path for production releases.
+
+## Maintenance mode
+
+Project is in maintenance: security fixes and clear bugs only. Feature work is
+paused until a concrete use-case or external demand appears.
 
 ## Trusted publisher
 
