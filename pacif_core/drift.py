@@ -164,7 +164,6 @@ class PageHinkleyDetector:
         if self.baseline is None:
             self.baseline = sum(self.history) / float(len(self.history))
 
-        # Running mean of the current regime; PH uses mean *before* this update.
         if self._n == 0:
             prev_mean = float(self.baseline)
             self._mean = float(self.baseline)

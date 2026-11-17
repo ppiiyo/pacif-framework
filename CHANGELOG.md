@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drift history bounded with `deque(maxlen=50)` (was unbounded list).
 - Audit median uses `statistics.median` (even-length half-sum; was lower middle index only).
 - `generate_pacif_features` now receives the dataset `seed` from `synthetic_causal_dataset` (was ignored).
+- Publish workflow version check no longer imports `pacif_core` (uses `runpy` on `_version.py`); avoids `ModuleNotFoundError` for yaml/numba before install.
 - **PageHinkleyDetector** was previously equivalent to reflected CUSUM (same max-0 recurrence against a fixed baseline). It now implements classic two-sided Page–Hinkley with a **running mean** and min-based cumulative sums; alarm sequences differ from CUSUM on slow ramps.
 
 ### Added
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Single version source: `pacif_core/_version.py` (`3.1.0`); dynamic version in `pyproject.toml`.
 - CI: `mypy pacif_core` (numba `ignore_missing_imports` only); `pytest --cov=pacif_core`.
 - `causal_integration.monte_carlo` (100 seeds): mean ± std of |bias| with/without synthetic features.
+- Publish workflow runs ruff + mypy + pytest before build/upload; `workflow_dispatch` restricted to `main`.
 - ARL calibration table for Page–Hinkley in the class docstring (σ / lambda_ / mean ARL).
 
 ### Changed
@@ -36,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audit report `framework` string follows package version (`PACIF v3.1.0`); default schema `1.1` → `1.2`.
 - README / POSITIONING: removed non-reproducible “40–65%” and “~89%” claims; Miller–Madow described as first-order bias correction; DR result framed as illustrative synthetic simulation only.
 - Public language aligned with INTERPRETATION §3 (coupling / predictability, not “shapes” / “causes”).
+- Release path documented as **tag → tests → release** (`docs/RELEASING.md`); manual dispatch is emergency-only.
 - Page–Hinkley calibration guidance: target ARL under stationary noise, not a fixed multiple of SE.
 
 ## [3.0.1] - 2026-11-09

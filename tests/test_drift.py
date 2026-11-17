@@ -165,11 +165,9 @@ def test_ph_and_cusum_differ_on_ramp():
     ph = PageHinkleyDetector(delta=0.005, lambda_=0.15)
     cusum_alarms = []
     ph_alarms = []
-    # warmup flat
     for _ in range(60):
         cusum.update(0.3)
         ph.update(0.3)
-    # linear ramp
     for i in range(120):
         x = 0.3 + 0.004 * i
         if cusum.update(x).get("drift"):
