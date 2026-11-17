@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drift history bounded with `deque(maxlen=50)` (was unbounded list).
 - Audit median uses `statistics.median` (even-length half-sum; was lower middle index only).
 - `generate_pacif_features` now receives the dataset `seed` from `synthetic_causal_dataset` (was ignored).
+- Publish workflow version check no longer imports `pacif_core` (uses `runpy` on `_version.py`); avoids `ModuleNotFoundError` for yaml/numba before install.
 
 ### Added
 - Optional `method="bootstrap"` (moving-block bootstrap CI, seeded).
@@ -28,12 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Single version source: `pacif_core/_version.py` (`3.1.0`); dynamic version in `pyproject.toml`.
 - CI: `mypy pacif_core` (numba `ignore_missing_imports` only); `pytest --cov=pacif_core`.
 - `causal_integration.monte_carlo` (100 seeds): mean ± std of |bias| with/without synthetic features.
+- Publish workflow runs ruff + mypy + pytest before build/upload; `workflow_dispatch` restricted to `main`.
 
 ### Changed
 - **Numeric estimates differ from 3.0.x** due to MM unit fix, cardinality guard, and sampling change. Re-baseline any thresholds calibrated on 3.0.x outputs.
 - Audit report `framework` string follows package version (`PACIF v3.1.0`); default schema `1.1` → `1.2`.
 - README / POSITIONING: removed non-reproducible “40–65%” and “~89%” claims; Miller–Madow described as first-order bias correction; DR result framed as illustrative synthetic simulation only.
 - Public language aligned with INTERPRETATION §3 (coupling / predictability, not “shapes” / “causes”).
+- Release path documented as **tag → tests → release** (`docs/RELEASING.md`); manual dispatch is emergency-only.
 
 ## [3.0.1] - 2026-11-09
 
