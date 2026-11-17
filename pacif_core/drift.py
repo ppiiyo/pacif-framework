@@ -1,8 +1,8 @@
 """Drift detectors for sequential MI (or other scalar) streams.
 
-Thresholds are absolute and expressed in the same units as the input values
-(typically nats). Recommended calibration: threshold ≈ 3 * median SE of the
-upstream estimator.
+CUSUM uses a fixed post-warmup baseline. Page–Hinkley uses a running mean.
+Calibrate thresholds via average run length (ARL) under stationary noise —
+see :class:`PageHinkleyDetector` docstring for a simulation table.
 """
 from __future__ import annotations
 
@@ -79,18 +79,37 @@ class DriftDetector:
 
 
 class PageHinkleyDetector:
-    """Two-sided Page–Hinkley detector (reflected cumulative sums).
+    """Classic two-sided Page–Hinkley detector (running mean).
 
-    Against a fixed baseline after warmup::
+    After warmup the detector maintains a running mean ``mu_t``. Cumulative
+    sums use the previous-step mean (standard sequential update)::
 
-        m+ = max(0, m+ + (x - baseline - delta))
-        m- = max(0, m- + (baseline - x - delta))
+        m_t += (x_t - mu_{t-1} - delta);   M_t = min(M, m_t)
+        w_t += (mu_{t-1} - x_t - delta);   Wm_t = min(Wm, w_t)
 
-    Alarm when ``m+ > lambda_`` or ``m- > lambda_``. Same rebaseline protocol
-    as :class:`DriftDetector`.
+    Alarm when ``m_t - M_t > lambda_`` (up) or ``w_t - Wm_t > lambda_`` (down).
+    On alarm returns the **pre-drift** baseline (mean of the last completed
+    warmup / rebaseline window), then spends ``rebaseline_window`` steps
+    rebuilding the baseline before statistics resume.
 
-    Thresholds are absolute (nats when applied to MI). Recommended calibration:
-    ``lambda_ ≈ 3 * median SE`` of the upstream estimator.
+    This is **not** the same as :class:`DriftDetector` (CUSUM with a fixed
+    baseline and reflected max-0 recursions).
+
+    **ARL calibration** (stationary N(level, σ²), delta=0.005, warmup=50,
+    20 seeds × 2000 steps, first-alarm time censored at 2000):
+
+    =======  =========  ==============
+    σ        lambda_    mean ARL
+    =======  =========  ==============
+    0.005    0.15       > 500 (0 alarms / 500 steps, 10 seeds)
+    0.02     0.15       ≈ 80
+    0.02     0.40       ≈ 130
+    0.02     0.80       ≈ 200
+    0.02     1.20       ≈ 300
+    =======  =========  ==============
+
+    Choose ``lambda_`` for a target ARL under the noise level of the upstream
+    MI series; do not use a fixed multiple of SE alone.
     """
 
     def __init__(
@@ -107,14 +126,22 @@ class PageHinkleyDetector:
         self.history: Deque[float] = deque(maxlen=50)
         self.n_obs = 0
         self.baseline: Optional[float] = None
-        self._m_pos = 0.0
-        self._m_neg = 0.0
+        self._mean = 0.0
+        self._n = 0
+        self._m = 0.0
+        self._m_min = 0.0
+        self._w = 0.0
+        self._w_min = 0.0
         self._rebaselining = False
         self._rebase_buf: List[float] = []
 
     def _reset_ph(self) -> None:
-        self._m_pos = 0.0
-        self._m_neg = 0.0
+        self._mean = 0.0
+        self._n = 0
+        self._m = 0.0
+        self._m_min = 0.0
+        self._w = 0.0
+        self._w_min = 0.0
 
     def update(self, value: float) -> Dict[str, Any]:
         value = float(value)
@@ -137,12 +164,27 @@ class PageHinkleyDetector:
         if self.baseline is None:
             self.baseline = sum(self.history) / float(len(self.history))
 
-        base = float(self.baseline)
-        self._m_pos = max(0.0, self._m_pos + (value - base - self.delta))
-        self._m_neg = max(0.0, self._m_neg + (base - value - self.delta))
+        if self._n == 0:
+            prev_mean = float(self.baseline)
+            self._mean = float(self.baseline)
+            self._n = 1
+        else:
+            prev_mean = self._mean
+            self._n += 1
+            self._mean = self._mean + (value - self._mean) / float(self._n)
 
-        if self._m_pos > self.lambda_ or self._m_neg > self.lambda_:
-            pre_baseline = base
+        self._m += value - prev_mean - self.delta
+        if self._m < self._m_min:
+            self._m_min = self._m
+
+        self._w += prev_mean - value - self.delta
+        if self._w < self._w_min:
+            self._w_min = self._w
+
+        up = self._m - self._m_min > self.lambda_
+        down = self._w - self._w_min > self.lambda_
+        if up or down:
+            pre_baseline = float(self.baseline)
             self._reset_ph()
             self._rebaselining = True
             self._rebase_buf = []
