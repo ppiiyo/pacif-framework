@@ -11,7 +11,7 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.19902776
 license: Apache-2.0
-version: 3.1.0
+version: 3.1.1
 date-released: "2026-11-17"
 keywords:
   - algorithmic-accountability
